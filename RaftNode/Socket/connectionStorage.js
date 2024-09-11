@@ -4,17 +4,17 @@ let connectionStorage = new Map();
 
 // Add a connection to the storage
 const addConnection = (nodeId, socket) => {
-    connectionStorage.set(nodeId, socket);
+    connectionStorage.set(nodeId.toString(), socket);
 }
 
 // Get a connection from the storage by node id
 const getConnection = (nodeId) => {
-    return connectionStorage.get(nodeId);
+    return connectionStorage.get(nodeId.toString());
 }
 
 // Remove a connection from the storage by node id
 const removeConnection = (nodeId) => {
-    connectionStorage.delete(nodeId);
+    connectionStorage.delete(nodeId.toString());
 }
 
 // Get all connections from the storage
@@ -29,7 +29,7 @@ const getConnectionCount = () => {
 
 // Checks if the connection exists in the storage
 const checkConnection = (nodeId) => {
-    return connectionStorage.has(nodeId);
+    return connectionStorage.has(nodeId.toString());
 }
 
 module.exports = {

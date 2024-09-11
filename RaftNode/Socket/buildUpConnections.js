@@ -9,7 +9,7 @@ const buildUpConnections = async (fastify) => {
     const totalCount = fastify.totalCount;
     const serverId = fastify.serverId;
     while (!checkConnectionCount(totalCount)) {
-        console.log('Trying to establish connections');
+        console.log('Trying to establish connections. Current Count: ', getConnectionCount());
         for(const id of Array.from({length: totalCount}, (_, i) => i + 1)) {
             if(id.toString() === serverId.toString()) {
                 continue;

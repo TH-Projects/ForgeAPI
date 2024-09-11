@@ -8,42 +8,70 @@ fi
 
 INSTANCE_COUNT=$1
 
-echo "Starte Datenbank-Container"
+# Erstelle die Docker-Compose-Datei
+DOCKER_COMPOSE_FILE="docker-compose.yml"
 
-# Starte die Datenbank-Container
-#docker-compose -f docker-compose.db.yml up -d
+# Setze Umgebungsvariablen in die Docker-Compose-Datei ein
+cat <<EOL > $DOCKER_COMPOSE_FILE
+version: '3.8'
 
-# Erstelle eine temporäre Docker-Compose-Datei für die Server-Instanzen
-SERVER_COMPOSE_FILE="docker-compose.server.yml"
+services:
+  # Datenbank-Container
+EOL
 
-# Setze Umgebungsvariablen für die Server-Instanzen
-echo "version: '3.8'" >> $SERVER_COMPOSE_FILE
-echo "services:" >> $SERVER_COMPOSE_FILE
+for i in $(seq 1 $INSTANCE_COUNT)
+do
+  cat <<EOL >> $DOCKER_COMPOSE_FILE
+  db-${i}:
+    image: postgres:14
+    container_name: db-${i}
+    env_file:
+      - .env
+    volumes:
+      - db_data_${i}:/var/lib/postgresql/data
+      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "$((5432 + i)):5432"
+EOL
+done
 
+cat <<EOL >> $DOCKER_COMPOSE_FILE
+  # Server-Container
+EOL
 
 for i in $(seq 1 $INSTANCE_COUNT)
 do
   EXTERNAL_PORT=$((3000 + i))
-  echo "  raftnode_${i}:" >> $SERVER_COMPOSE_FILE
-  echo "    image: raftnode" >> $SERVER_COMPOSE_FILE
-  echo "    build: RaftNode" >> $SERVER_COMPOSE_FILE
-  echo "    environment:" >> $SERVER_COMPOSE_FILE
-  echo "      - DB_HOST=db-${i}" >> $SERVER_COMPOSE_FILE
-  echo "      - TOTAL_SERVERS=${INSTANCE_COUNT}" >> $SERVER_COMPOSE_FILE
-  echo "      - SERVER_ID=${i}" >> $SERVER_COMPOSE_FILE
-  echo "    ports:" >> $SERVER_COMPOSE_FILE
-  echo "      - \"${EXTERNAL_PORT}:3000\"" >> $SERVER_COMPOSE_FILE
-  echo "    container_name: raftnode_${i}" >> $SERVER_COMPOSE_FILE
-  echo "    networks:" >> $SERVER_COMPOSE_FILE
-  echo "      - my-network" >> $SERVER_COMPOSE_FILE
+  cat <<EOL >> $DOCKER_COMPOSE_FILE
+  raftnode_${i}:
+    image: raftnode
+    build: RaftNode
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db-${i}
+      - TOTAL_SERVERS=${INSTANCE_COUNT}
+      - SERVER_ID=${i}
+    ports:
+      - "${EXTERNAL_PORT}:3000"
+    container_name: raftnode_${i}
+EOL
 done
-echo "networks:" >> $SERVER_COMPOSE_FILE
-echo "  my-network:" >> $SERVER_COMPOSE_FILE
-# Starte die Server-Container
-echo "Starte Server-Container"
-docker-compose -f $SERVER_COMPOSE_FILE up -d --build
 
-# Lösche die temporäre Docker-Compose-Datei
-rm $SERVER_COMPOSE_FILE
+cat <<EOL >> $DOCKER_COMPOSE_FILE
+volumes:
+EOL
+
+for i in $(seq 1 $INSTANCE_COUNT)
+do
+  cat <<EOL >> $DOCKER_COMPOSE_FILE
+  db_data_${i}:
+EOL
+done
+
+# Starte die Container
+docker-compose up -d --build
+
+rm $DOCKER_COMPOSE_FILE
 
 echo "Gestartet: $INSTANCE_COUNT Server-Container und Datenbank-Container"
