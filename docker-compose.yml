@@ -1,6 +1,0 @@
-services:
-  raftnode:
-    image: raftnode
-    build: RaftNode
-    env_file:
-      - .env
