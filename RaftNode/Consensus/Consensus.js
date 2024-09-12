@@ -1,8 +1,11 @@
+const {startLeaderElection} = require('./leaderElection');
+const {sendHeartbeat} = require('./heartbeat');
+
 class Consensus{
-    constructor() {
+    constructor(fastify) {
         //Define Timeout durations
         this.heartbeatTimeoutDuration = 500;
-        this.voteTimeoutDuration = 1500;
+        this.voteTimeoutDuration = 2000;
 
         //Define Timeouts
         this.selectLeaderTimeout = null;
@@ -11,18 +14,18 @@ class Consensus{
 
         //Define Consensus Variables
         this.leader = null;
+        this.fastify = fastify;
 
 
         //Call initial Methods
-        this.startsSelectLeaderTimeout();
-        this.startsHeartbeatTimeout();
         this.startsVoteTimeout();
+        this.startsHeartbeatTimeout();
 
     }
 
     //Returns a random Timeout Duration for Select Leader
     getLeaderTimeoutDuration() {
-        return Math.floor(Math.random() * (1000 - 200 + 1)) + 200;
+        return Math.floor(Math.random() * (1500 - 1000 + 1)) + 200;
     }
 
     //Starts the Select Leader Timeout
@@ -30,12 +33,16 @@ class Consensus{
         if(this.selectLeaderTimeout) {
             clearTimeout(this.selectLeaderTimeout);
         }
-        if(this.leader) {
-            return;
-        }
         this.selectLeaderTimeout = setTimeout(() => {
             this.selectLeader();
         }, this.getLeaderTimeoutDuration());
+    }
+
+    //stops the Select Leader Timeout
+    stopsSelectLeaderTimeout() {
+        if(this.selectLeaderTimeout) {
+            clearTimeout(this.selectLeaderTimeout);
+        }
     }
 
     //Starts the Heartbeat Timeout
@@ -43,7 +50,7 @@ class Consensus{
         if(this.heartbeatTimeout) {
             clearTimeout(this.heartbeatTimeout);
         }
-        if(!this.leader) {
+        if(!this.leader || this.leader.toString() !== this.fastify.serverId.toString()) {
             return;
         }
         this.heartbeatTimeout = setTimeout(() => {
@@ -56,38 +63,71 @@ class Consensus{
         if(this.voteTimeout) {
             clearTimeout(this.voteTimeout);
         }
-        if(this.leader) {
-            return;
-        }
         this.voteTimeout = setTimeout(() => {
             this.vote();
         }, this.voteTimeoutDuration);
     }
 
     //Starts the Select Leader Routine
-    selectLeader() {
+    async selectLeader() {
         console.log('Selecting Leader');
-        this.startsSelectLeaderTimeout();
-        this.startsVoteTimeout();
+        await startLeaderElection(this.fastify);
     }
 
     //Starts the Send Heartbeat Routine
     sendHeartbeat() {
-        console.log('Sending Heartbeat');
         this.startsHeartbeatTimeout();
+        if(!this.leader || this.leader.toString() !== this.fastify.serverId.toString()) {
+            return;
+        }
+        console.log('Sending Heartbeat');
+        sendHeartbeat(this.fastify);
     }
 
     //Starts the Vote Routine
     vote() {
+        if(this.leader && this.leader.toString() === this.fastify.serverId.toString()) {
+            return;
+        }
+        this.startsVoteTimeout();
         console.log('Voting');
-    }
-
-    //Recieves Heartbeat
-    recieveHeartbeat() {
-        console.log('Recieved Heartbeat');
-        this.startsHeartbeatTimeout();
         this.startsSelectLeaderTimeout();
     }
+
+    //Receives Heartbeat
+    receiveHeartbeat(payload) {
+        console.log('Recieved Heartbeat');
+        if(!this.leader){
+            this.setLeader(payload.serverId);
+        }
+        this.startsVoteTimeout();
+    }
+
+    //sets the leader
+    setLeader(leader) {
+        console.log('Leader is: ', leader);
+        this.leader = leader;
+        this.startsHeartbeatTimeout();
+    }
+
+    //gets the leader
+    getLeader() {
+        return this.leader;
+    }
+
+    //checks if the Id is the leader
+    checkLeader(Id) {
+        if(!this.leader) {
+            return false;
+        }
+        return this.leader.toString() === Id.toString();
+    }
+
+    //removes the leader
+    removeLeader() {
+        this.leader = null;
+    }
+
 }
 
 module.exports = Consensus;

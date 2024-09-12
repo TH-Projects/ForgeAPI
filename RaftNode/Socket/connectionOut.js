@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const {handleMessage} = require('./messageHandler');
-const {addConnection} = require('./connectionStorage');
-const {communicationTypes} = require('./enums');
+const {addConnection, removeConnection} = require('./connectionStorage');
+const {communicationTypes} = require('../enums');
 
 // Connections to other instances
 const connectionOut = (fastify, url, id) => {
@@ -10,17 +10,22 @@ const connectionOut = (fastify, url, id) => {
     // Open the connection
     ws.on('open', () => {
         addConnection(id, ws);
-        ws.send(createAddConnectionMessage(fastify));
+        if(ws.readyState === WebSocket.OPEN){
+            ws.send(createAddConnectionMessage(fastify));
+        }
     });
 
     // Receive messages
     ws.on('message', (message) => {
-        handleMessage(message, ws);
+        if(Buffer.isBuffer(message)){
+            message = message.toString();
+        }
+        handleMessage(fastify, message, ws);
     });
 
     // Close the connection
     ws.on('close', () => {
-
+        removeConnection(ws)
     });
 
     // Error handling
