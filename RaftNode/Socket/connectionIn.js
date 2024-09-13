@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const {handleMessage} = require('./messageHandler');
+const {removeConnection} = require('./connectionStorage');
 
 // Connections from other instances
 function connectionIn (fastify){
@@ -9,12 +10,15 @@ function connectionIn (fastify){
 
         // Handle incoming messages
         ws.on('message', (message) => {
-            handleMessage(message, ws);
+            if(Buffer.isBuffer(message)){
+                message = message.toString();
+            }
+            handleMessage(fastify, message, ws);
         });
 
         // Handle connection close
         ws.on('close', () => {
-
+            removeConnection(ws)
         });
 
         // Handle errors

@@ -25,7 +25,7 @@ const start = async () => {
         connectionIn(fastify);
         await buildUpConnections(fastify);
         await new Promise(resolve => setTimeout(resolve, 5000));
-        addConsensus(new consensus());
+        addConsensus(new consensus(fastify));
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);

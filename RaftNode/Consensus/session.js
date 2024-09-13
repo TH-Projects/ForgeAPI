@@ -10,7 +10,13 @@ const removeConsensus = () => {
     consensusStorage = null;
 }
 
+// Get the consensus from the storage
+const getConsensus = () => {
+    return consensusStorage;
+}
+
 module.exports = {
     addConsensus,
-    removeConsensus
+    removeConsensus,
+    getConsensus
 }

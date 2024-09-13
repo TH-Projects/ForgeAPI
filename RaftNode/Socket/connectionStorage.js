@@ -1,3 +1,5 @@
+const session = require('../Consensus/session');
+
 
 // contains all the connections of the nodes
 let connectionStorage = new Map();
@@ -13,8 +15,18 @@ const getConnection = (nodeId) => {
 }
 
 // Remove a connection from the storage by node id
-const removeConnection = (nodeId) => {
-    connectionStorage.delete(nodeId.toString());
+const removeConnection = (ws) => {
+    for(const [key, value] of connectionStorage){
+        if(value === ws){
+            connectionStorage.delete(key.toString());
+            const consensus = session.getConsensus();
+            if(consensus && consensus.checkLeader(key)){
+                consensus.removeLeader();
+            }
+            console.log('Connection removed: ', key);
+            return;
+        }
+    }
 }
 
 // Get all connections from the storage
