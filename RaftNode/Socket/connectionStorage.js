@@ -44,11 +44,28 @@ const checkConnection = (nodeId) => {
     return connectionStorage.has(nodeId.toString());
 }
 
+//get Consensus leader from the storage
+const getLeaderConnection = () => {
+    const consensus = session.getConsensus();
+    if(!consensus){
+        return null;
+    }
+
+    const leader = consensus.getLeader();
+
+    if(!leader){
+        return null;
+    }
+
+    return connectionStorage.get(leader);
+}
+
 module.exports = {
     addConnection,
     getConnection,
     removeConnection,
     getAllConnections,
     getConnectionCount,
-    checkConnection
+    checkConnection,
+    getLeaderConnection
 };

@@ -2,6 +2,8 @@ const {communicationTypes, consensusTypes} = require('../enums');
 const {addConnection} = require('./connectionStorage');
 const {getConsensus} = require('../Consensus/session');
 const {handleLeaderElection, handleVoteResponse, publishLeaderElection} = require('../Consensus/leaderElection');
+const {handleHeartbeat, handleMissingLog, insertMissingLog} = require('../Consensus/heartbeat');
+
 //handles the messages from connectionIn and connectionOut
 const handleMessage = (fastify, message, ws) => {
     console.log(`Received message: ${message}`);
@@ -34,10 +36,15 @@ const handleMessage = (fastify, message, ws) => {
             break;
         case consensusTypes.HEARBEAT:
             // Handle the heartbeat
-            const consensus = getConsensus();
-            if(consensus){
-                consensus.receiveHeartbeat(payload);
-            }
+            handleIncomingHeartbeat(fastify, payload);
+            break;
+        case consensusTypes.MISSINGLOG:
+            // Handle the missing log
+            handleMissingLog(fastify, payload);
+            break;
+        case consensusTypes.APPENDLOG:
+            // Handle the append log
+            insertMissingLog(fastify, payload);
             break;
         default:
             console.log('Invalid message type');
@@ -62,6 +69,14 @@ const updateLeader = (serverId) => {
 
 }
 
+//handle heartbeat an check current logId
+const handleIncomingHeartbeat = async (fastify, payload) => {
+    const consensus = getConsensus();
+    if(consensus){
+        consensus.receiveHeartbeat(payload);
+        await handleHeartbeat(fastify, payload);
+    }
+}
 module.exports = {
     handleMessage
 }

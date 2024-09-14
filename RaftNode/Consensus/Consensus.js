@@ -25,7 +25,7 @@ class Consensus{
 
     //Returns a random Timeout Duration for Select Leader
     getLeaderTimeoutDuration() {
-        return Math.floor(Math.random() * (1500 - 1000 + 1)) + 200;
+        return Math.floor(Math.random() * (1800 - 800 + 1)) + 200;
     }
 
     //Starts the Select Leader Timeout

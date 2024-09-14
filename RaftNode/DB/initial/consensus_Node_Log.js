@@ -21,10 +21,10 @@ const getAll = async (fastify) => {
 }
 
 // Insert data into the table
-const insert = async (fastify, command) => {
+const insert = async (fastify, query, values) => {
     const client = await fastify.pg.connect();
     try {
-        const { rows } = await client.query(`INSERT INTO ${tableName} (command) VALUES ($1) RETURNING id`, [command]);
+        const { rows } = await client.query(query, values);
         if(rows.length > 0){
             return {
                 success: true,
@@ -44,6 +44,22 @@ const insert = async (fastify, command) => {
     finally {
         client.release();
     }
+}
+
+//Insert data into the table with date
+const insertWithDate = async (fastify, command, date) => {
+    const query = `INSERT INTO ${tableName} (command, commandtime) VALUES ($1, $2) RETURNING id`;
+    const values = [command, date];
+    console.log('Inserting data command: ', command, ' date: ', date);
+    return insert(fastify, query, values);
+}
+
+
+//Insert data into the table without date
+const insertWithoutDate = async (fastify, command) => {
+    const query = `INSERT INTO ${tableName} (command) VALUES ($1) RETURNING id`;
+    const values = [command];
+    return insert(fastify, query, values);
 }
 
 // Get the latest id from the table
@@ -72,8 +88,30 @@ const getLatestId = async (fastify) => {
     }
 }
 
+// Get all data from the table starting from a specific id
+const getAllByStartId = async (fastify, startId) => {
+    const client = await fastify.pg.connect();
+    try {
+        const { rows } = await client.query(`SELECT * FROM ${tableName} WHERE id > $1`, [startId]);
+        return {
+            success: true,
+            data: rows,
+        };
+    } catch (err) {
+        console.log(err);
+        return {
+            success: false
+        };
+    }
+    finally {
+        client.release();
+    }
+}
+
 module.exports = {
     getAll,
-    insert,
-    getLatestId
+    insertWithDate,
+    insertWithoutDate,
+    getLatestId,
+    getAllByStartId
 }

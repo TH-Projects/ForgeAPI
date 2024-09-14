@@ -88,6 +88,7 @@ const handleVoteResponse = (fastify, payload) => {
     return false;
 }
 
+// Publish the leader election to all the nodes
 const publishLeaderElection = async (fastify) => {
     const connections = getAllConnections();
     const serverId = fastify.serverId;
