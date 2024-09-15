@@ -1,22 +1,24 @@
 // Reserved keywords that cannot be used as identifiers
-reserved_keyword ::=  "DATABASE"
-                    | "TABLE"
-                    | "COLUMN"
-                    | "AUTO_ID"
-                    | "string"
-                    | "integer"
-                    | "float"
-                    | "boolean"
-                    | "date"
-                    | "timestamp"
-                    | "PRIMARY_KEY"
-                    | "FOREIGN_KEY"
-                    | "REST"
-                    | "GET"
-                    | "POST"
-                    | "PUT"
-                    | "DELETE"
-                    | "Konsensus_Node_Log" // Forbidden because it is a reserved default table name
+reserved_keyword ::= "DATABASE"
+                  | "TABLE"
+                  | "COLUMN"
+                  | "AUTO_ID"
+                  | "string"
+                  | "integer"
+                  | "float"
+                  | "boolean"
+                  | "date"
+                  | "timestamp"
+                  | "PRIMARY_KEY"
+                  | "FOREIGN_KEY"
+                  | "REST"
+                  | "GET"
+                  | "POST"
+                  | "PUT"
+                  | "DELETE"
+                  | "NOT"
+                  | "NULL"
+                  | "Konsensus_Node_Log" // Forbidden because it is a reserved default table name
 
 // Defines a database with a name and one or more tables
 database ::= "DATABASE" dbname "{" table+ "}"
@@ -24,8 +26,8 @@ database ::= "DATABASE" dbname "{" table+ "}"
 // Defines a table with a name, one or more columns, an optional foreign key, and a REST block
 table ::= "TABLE" tablename "{" column+ foreign_key? rest_block "}"
 
-// Defines a column with a name, data type, and optional primary key indicator
-column ::= "COLUMN" columnname datatype (primary_key | ",")?
+// Defines a column with a name, data type, optional primary key indicator, and optional NOT NULL constraint
+column ::= "COLUMN" columnname datatype (primary_key | ",")? (not_null)?
 
 // Defines various data types, including custom ones for serial and Varchar
 datatype ::=  "AUTO_ID"  // Equivalent to SQL's SERIAL
@@ -52,6 +54,9 @@ rest_endpoint ::= ("GET" | "POST" | "PUT" | "DELETE") url ( "?" parameter+ )?
 // Defines a parameter as an identifier followed by an equals sign and another identifier
 parameter ::= identifier "=" identifier
 
+// Defines the NOT NULL constraint
+not_null ::= "NOT" "NULL"
+
 // Definitions for identifiers, including names for databases, tables, columns, and URLs
 dbname ::= identifier
 tablename ::= identifier
@@ -63,7 +68,7 @@ length ::= digit+
 
 // Defines an identifier as a letter followed by zero or more letters or digits, but not a reserved keyword
 identifier ::= letter (letter | digit)* 
-             & !reserved_keyword // Ensure identifier is not a reserved keyword
+              & !reserved_keyword // Ensure identifier is not a reserved keyword
 
 // Defines a letter as any uppercase or lowercase English letter
 letter ::= "a" | ... | "z" | "A" | ... | "Z"
