@@ -1,0 +1,14 @@
+DATABASE mydbname {
+    TABLE mytablename {
+        COLUMN id AUTO_ID PRIMARY_KEY,
+        COLUMN name string(256),
+
+        FOREIGN_KEY (othertablename.id)
+
+        REST {
+            GET /mytablename,            // FullTable-Scan
+            POST /mytablename,           // Adding a new record
+            DELETE /mytablename?name=:name  // Deleting recods when it matches :name
+        }
+    }
+}

@@ -1,0 +1,72 @@
+// Reserved keywords that cannot be used as identifiers
+reserved_keyword ::=  "DATABASE"
+                    | "TABLE"
+                    | "COLUMN"
+                    | "AUTO_ID"
+                    | "string"
+                    | "integer"
+                    | "float"
+                    | "boolean"
+                    | "date"
+                    | "timestamp"
+                    | "PRIMARY_KEY"
+                    | "FOREIGN_KEY"
+                    | "REST"
+                    | "GET"
+                    | "POST"
+                    | "PUT"
+                    | "DELETE"
+                    | "Konsensus_Node_Log" // Forbidden because it is a reserved default table name
+
+// Defines a database with a name and one or more tables
+database ::= "DATABASE" dbname "{" table+ "}"
+
+// Defines a table with a name, one or more columns, an optional foreign key, and a REST block
+table ::= "TABLE" tablename "{" column+ foreign_key? rest_block "}"
+
+// Defines a column with a name, data type, and optional primary key indicator
+column ::= "COLUMN" columnname datatype (primary_key | ",")?
+
+// Defines various data types, including custom ones for serial and Varchar
+datatype ::=  "AUTO_ID"  // Equivalent to SQL's SERIAL
+            | "string(" length ")"  // Equivalent to SQL's VARCHAR(x)
+            | "integer"
+            | "float"
+            | "boolean"
+            | "date"
+            | "timestamp"
+// Add other SQL data types as needed
+
+// Indicates a primary key for the column
+primary_key ::= "PRIMARY_KEY"
+
+// Defines a foreign key with the table and column it references
+foreign_key ::= "FOREIGN_KEY" "(" tablename "." columnname ")"
+
+// Defines a block for REST endpoints with one or more endpoints
+rest_block ::= "REST" "{" rest_endpoint+ "}"
+
+// Defines a REST endpoint with a method, URL, and optional parameters
+rest_endpoint ::= ("GET" | "POST" | "PUT" | "DELETE") url ( "?" parameter+ )?
+
+// Defines a parameter as an identifier followed by an equals sign and another identifier
+parameter ::= identifier "=" identifier
+
+// Definitions for identifiers, including names for databases, tables, columns, and URLs
+dbname ::= identifier
+tablename ::= identifier
+columnname ::= identifier
+url ::= "/" identifier
+
+// Defines the length for a string data type as one or more digits
+length ::= digit+
+
+// Defines an identifier as a letter followed by zero or more letters or digits, but not a reserved keyword
+identifier ::= letter (letter | digit)* 
+             & !reserved_keyword // Ensure identifier is not a reserved keyword
+
+// Defines a letter as any uppercase or lowercase English letter
+letter ::= "a" | ... | "z" | "A" | ... | "Z"
+
+// Defines a digit as any numeral from 0 to 9
+digit ::= "0" | ... | "9"
