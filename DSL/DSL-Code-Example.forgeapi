@@ -14,12 +14,9 @@ DATABASE mydbname {
 
         // Define a block for REST API endpoints
         REST {
-            get /mytablename,                   // Fetches all records (FullTable-Scan)
-            get /mytablename/{id},              // Fetches a specific record by ID
-            post /mytablename,                  // Adds a new record
-            put /mytablename/{id},              // Updates a specific record by ID
-            delete /mytablename/{id},           // Deletes a specific record by ID
-            delete /mytablename?name=:name     // Deletes records matching the :name parameter
+            get /mytablename,                  // Fetches all records (FullTable-Scan)
+            post /mytablename,                 // Adds a new record
+            delete /mytablename?name=:name    // Deletes records where the name matches the :name parameter
         }
     }
 }
