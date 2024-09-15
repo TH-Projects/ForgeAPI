@@ -18,13 +18,13 @@ reserved_keyword ::= "DATABASE"
                   | "delete"
                   | "not"
                   | "null"
-                  | "Konsensus_Node_Log" // Forbidden because it is a reserved default table name
+                  | "Consensus_Node_Log" // Forbidden because it is a reserved default table name
 
-// Defines a database with a name and one or more tables
-database ::= "DATABASE" dbname "{" table+ "}"
+// Defines a database with a name, one or more tables, and optional REST endpoints
+database ::= "DATABASE" dbname "{" table+ (rest_block)? "}"
 
-// Defines a table with a name, one or more columns, an optional foreign key, and a REST block
-table ::= "TABLE" tablename "{" column+ foreign_key? rest_block "}"
+// Defines a table with a name, one or more columns, optional foreign keys
+table ::= "TABLE" tablename "{" column+ foreign_key* "}"
 
 // Defines a column with a name, data type, optional primary key indicator, and optional NOT NULL constraint
 column ::= "COLUMN" columnname datatype (primary_key | ",")? (not_null)?

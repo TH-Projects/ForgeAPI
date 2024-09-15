@@ -1,22 +1,30 @@
-DATABASE mydbname {
-    TABLE mytablename {
-        // Define columns with various constraints and data types
-        COLUMN id auto_id PK not null,         // Primary key with auto-increment and not null constraint
-        COLUMN name string(256) not null,      // Non-nullable string with a maximum length of 256
-        COLUMN age integer,                    // Integer column without additional constraints
-        COLUMN price float not null,           // Non-nullable float column
-        COLUMN created_at timestamp,           // Timestamp for record creation
-        COLUMN updated_at timestamp,           // Timestamp for record updates
+DATABASE mycompany {
+    TABLE employees {
+        COLUMN emp_id auto_id PK not null,
+        COLUMN first_name string(100) not null,
+        COLUMN last_name string(100) not null,
+        COLUMN birth_date date,
+        COLUMN salary float,
+        COLUMN hire_date timestamp not null,
+        FK (departments.dept_id)
+    }
 
-        // Define foreign keys to link this table with other tables
-        FK (othertablename.id),                // Foreign key referencing id in another table
-        FK (anothertablename.reference_id),    // Another foreign key referencing a column in a different table
+    TABLE departments {
+        COLUMN dept_id auto_id PK not null,
+        COLUMN dept_name string(255) not null
+    }
 
-        // Define a block for REST API endpoints
-        REST {
-            get /mytablename,                  // Fetches all records (FullTable-Scan)
-            post /mytablename,                 // Adds a new record
-            delete /mytablename?name=:name    // Deletes records where the name matches the :name parameter
-        }
+    REST {
+        // Endpoints for employees table
+        get /employees,                 // Fetches all employee records
+        get /employees?first_name=<first_name>, // Fetches employees by first name
+        post /employees,                // Adds a new employee
+        put /employees?emp_id=<emp_id>,        // Updates an employee by ID
+        delete /employees?emp_id=<emp_id>,     // Deletes an employee by ID
+
+        // Endpoints for departments table
+        get /departments,               // Fetches all department records
+        post /departments,              // Adds a new department
+        delete /departments?dept_name=dept_name  // Deletes departments by name
     }
 }
