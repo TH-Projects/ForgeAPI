@@ -2,6 +2,7 @@ const {getAllConnections, getLeaderConnection, getConnection} = require('../Sock
 const {consensusTypes} = require('../enums');
 const webSocket = require('ws');
 const {getLatestId, getAllByStartId, insertWithDate} = require('../DB/initial/consensus_Node_Log');
+const {dbInteraction} = require('../DB/initial/dbInteraction');
 
 const sendHeartbeat = async (fastify) => {
     const connections = getAllConnections();
@@ -83,8 +84,11 @@ const insertMissingLog = async (fastify, payload) => {
     for(const entry of entries){
         const {success} = await insertWithDate(fastify, entry.command, entry.commandtime);
         if(!success)
-            return;
+            return false;
+        const commandJson = JSON.parse(entry.command);
+        await dbInteraction(fastify, commandJson.query, commandJson.values ?? null);
     }
+    return true;
 }
 
 module.exports = {

@@ -3,6 +3,7 @@ const {addConnection} = require('./connectionStorage');
 const {getConsensus} = require('../Consensus/session');
 const {handleLeaderElection, handleVoteResponse, publishLeaderElection} = require('../Consensus/leaderElection');
 const {handleHeartbeat, handleMissingLog, insertMissingLog} = require('../Consensus/heartbeat');
+const {dbInteraction} = require('../DB/initial/dbInteraction');
 
 //handles the messages from connectionIn and connectionOut
 const handleMessage = (fastify, message, ws) => {
@@ -69,7 +70,7 @@ const updateLeader = (serverId) => {
 
 }
 
-//handle heartbeat an check current logId
+//handle heartbeat and check current logId
 const handleIncomingHeartbeat = async (fastify, payload) => {
     const consensus = getConsensus();
     if(consensus){
