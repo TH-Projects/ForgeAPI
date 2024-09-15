@@ -2,22 +2,22 @@
 reserved_keyword ::= "DATABASE"
                   | "TABLE"
                   | "COLUMN"
-                  | "AUTO_ID"
+                  | "auto_id"
                   | "string"
                   | "integer"
                   | "float"
                   | "boolean"
                   | "date"
                   | "timestamp"
-                  | "PRIMARY_KEY"
-                  | "FOREIGN_KEY"
+                  | "PK"
+                  | "FK"
                   | "REST"
-                  | "GET"
-                  | "POST"
-                  | "PUT"
-                  | "DELETE"
-                  | "NOT"
-                  | "NULL"
+                  | "get"
+                  | "post"
+                  | "put"
+                  | "delete"
+                  | "not"
+                  | "null"
                   | "Konsensus_Node_Log" // Forbidden because it is a reserved default table name
 
 // Defines a database with a name and one or more tables
@@ -30,7 +30,7 @@ table ::= "TABLE" tablename "{" column+ foreign_key? rest_block "}"
 column ::= "COLUMN" columnname datatype (primary_key | ",")? (not_null)?
 
 // Defines various data types, including custom ones for serial and Varchar
-datatype ::=  "AUTO_ID"  // Equivalent to SQL's SERIAL
+datatype ::=  "auto_id"  // Equivalent to SQL's SERIAL
             | "string(" length ")"  // Equivalent to SQL's VARCHAR(x)
             | "integer"
             | "float"
@@ -40,22 +40,22 @@ datatype ::=  "AUTO_ID"  // Equivalent to SQL's SERIAL
 // Add other SQL data types as needed
 
 // Indicates a primary key for the column
-primary_key ::= "PRIMARY_KEY"
+primary_key ::= "PK"
 
 // Defines a foreign key with the table and column it references
-foreign_key ::= "FOREIGN_KEY" "(" tablename "." columnname ")"
+foreign_key ::= "FK" "(" tablename "." columnname ")"
 
 // Defines a block for REST endpoints with one or more endpoints
 rest_block ::= "REST" "{" rest_endpoint+ "}"
 
 // Defines a REST endpoint with a method, URL, and optional parameters
-rest_endpoint ::= ("GET" | "POST" | "PUT" | "DELETE") url ( "?" parameter+ )?
+rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter+ )?
 
 // Defines a parameter as an identifier followed by an equals sign and another identifier
 parameter ::= identifier "=" identifier
 
 // Defines the NOT NULL constraint
-not_null ::= "NOT" "NULL"
+not_null ::= "not" "null"
 
 // Definitions for identifiers, including names for databases, tables, columns, and URLs
 dbname ::= identifier
