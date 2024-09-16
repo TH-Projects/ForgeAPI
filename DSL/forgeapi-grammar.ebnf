@@ -37,7 +37,6 @@ datatype ::=  "auto_id"  // Equivalent to SQL's SERIAL
             | "boolean"
             | "date"
             | "timestamp"
-// Add other SQL data types as needed
 
 // Indicates a primary key for the column
 primary_key ::= "PK"
@@ -75,3 +74,6 @@ letter ::= "a" | ... | "z" | "A" | ... | "Z"
 
 // Defines a digit as any numeral from 0 to 9
 digit ::= "0" | ... | "9"
+
+// Defines a comment starting with % and continuing to the end of the line
+comment ::= "%" .*  // Matches a percent symbol followed by any characters to the end of the line
