@@ -20,6 +20,11 @@ class Lexer:
             if match:
                 token_value = match.group(0)
                 self.position = match.end()
+                
+                # If the matched token is a comment, skip it
+                if token == TokenDefinition.COMMENT:
+                    return self._get_next_substring()
+                
                 return token, token_value
         
         # If no token matches, move one character forward and mark it as an unknown token

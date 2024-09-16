@@ -37,6 +37,7 @@ class TokenDefinition(enum.Enum):
     QUESTION_MARK = r'\?'
     WS = r'\s+'  # Whitespace Token
     NEWLINE = r'\n'
+    COMMENT = r'%.*'  # Matches a percent symbol followed by any characters to the end of the line
 
     def __repr__(self):
         return f"<TokenDefinition.{self.name}>"

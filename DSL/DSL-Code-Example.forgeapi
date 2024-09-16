@@ -17,14 +17,14 @@ DATABASE mycompany {
     REST {
         % Endpoints for employees table
         get /employees,                 % Fetches all employee records
-        get /employees?first_name=<first_name>, % Fetches employees by first name
+        get /employees?first_name, % Fetches employees by first name
         post /employees,                % Adds a new employee
-        put /employees?emp_id=<emp_id>,        % Updates an employee by ID
-        delete /employees?emp_id=<emp_id>,     % Deletes an employee by ID
+        put /employees?emp_id,        % Updates an employee by ID
+        delete /employees?emp_id,     % Deletes an employee by ID
 
         % Endpoints for departments table
         get /departments,               % Fetches all department records
         post /departments,              % Adds a new department
-        delete /departments?dept_name=dept_name  % Deletes departments by name
+        delete /departments?dept_name % Deletes departments by name
     }
 }
