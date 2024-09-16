@@ -28,19 +28,15 @@ class TokenDefinition(enum.Enum):
     LPAREN = r'\('
     RPAREN = r'\)'
     EQUALS = r'='
-    URL = r'/[a-zA-Z_]+'
+    URL = r'/[a-zA-Z_][a-zA-Z_0-9]*'
     IDENTIFIER = r'[a-zA-Z_][a-zA-Z_0-9]*'
     NUMBER = r'\d+'
     COMMA = r','
-    WS = r'\s+'  # Whitespace, das ignoriert wird
+    DOT = r'\.'  
+    SLASH = r'/'
+    QUESTION_MARK = r'\?'
+    WS = r'\s+'  # Whitespace Token
     NEWLINE = r'\n'
 
     def __repr__(self):
         return f"<TokenDefinition.{self.name}>"
-
-
-"""
-# Printing all token definitions
-for token in TokenDefinition:
-    print(f"{token}: {token.value}")
-"""
