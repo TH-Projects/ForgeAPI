@@ -32,7 +32,7 @@ class TokenDefinition(enum.Enum):
     IDENTIFIER = r'[a-zA-Z_][a-zA-Z_0-9]*'
     NUMBER = r'\d+'
     COMMA = r','
-    DOT = r'\.'  
+    DOT = r'\.'
     SLASH = r'/'
     QUESTION_MARK = r'\?'
     WS = r'\s+'  # Whitespace Token
