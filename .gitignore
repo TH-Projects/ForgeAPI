@@ -130,4 +130,6 @@ dist
 .pnp.*
 
 # temp python files
-.pyc
+*.pyc
+__pycache__/
+

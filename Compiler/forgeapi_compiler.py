@@ -1,5 +1,7 @@
 import sys
 from CompilerFrontend.Lexer.lexer import Lexer
+from CompilerFrontend.Parser.parser import Parser
+from CompilerFrontend.Parser.print_tree import PrintTree
 
 def main():
     print("ForgeAPI Compiler")
@@ -25,9 +27,20 @@ def main():
     tokens = lexer.tokenize()
 
     # Output the tokenized source code
-    print("\nTokenized output:")
-    for token in tokens:
-        print(token)
+    #print("\nTokenized output:")
+    #for token in tokens:
+    #    print(token)
+
+    # Initialise parser with the tokens and parse them
+    parser = Parser(tokens)
+
+    try:
+        parse_tree = parser.parse()  # Parse the tokens to create the parse tree
+        print("\nParse tree:")
+        printed_tree = PrintTree(parse_tree)
+        print(printed_tree)
+    except SyntaxError as e:
+        sys.exit(f"Syntax error during parsing: {e}")
 
 if __name__ == "__main__":
     main()
