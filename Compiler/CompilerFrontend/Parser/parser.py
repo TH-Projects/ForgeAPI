@@ -151,7 +151,6 @@ class Parser:
             "name": columnname,
             "datatype": datatype,
             "primary_key": primary_key,
-            "foreign_key": foreign_key,
             "not_null": not_null
         }
 

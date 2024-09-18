@@ -69,7 +69,7 @@ class PrintTree:
                 # Recursively format foreign keys
                 result += ",\n" + f"{indent}  'foreign_keys': [\n"
                 for fk in node['foreign_keys']:
-                    result += self._format_node(fk, indent_level + 1) + ",\n"
+                    result += " \t" +  str(fk) + ",\n"
                 result += f"{indent}  ]"
             if 'rest_block' in node:
                 # Recursively format rest_block
@@ -79,7 +79,7 @@ class PrintTree:
                 # Recursively format endpoints
                 result += ",\n" + f"{indent}  'endpoints': [\n"
                 for endpoint in node['endpoints']:
-                    result += self._format_node(endpoint, indent_level + 1) + ",\n"
+                    result += "\t" + str(endpoint) + ",\n"
                 result += f"{indent}  ]"
             result += "}"
 
@@ -101,5 +101,4 @@ class PrintTree:
         elif node is None:
             # Format None nodes
             result += "None"
-
         return result
