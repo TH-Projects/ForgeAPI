@@ -3,6 +3,7 @@ DATABASE mycompany {
         COLUMN emp_id auto_id PK not null,
         COLUMN first_name string(100) not null,
         COLUMN last_name string(100) not null,
+        COLUMN dept_id integer not null,
         COLUMN birth_date date,
         COLUMN salary float,
         COLUMN hire_date timestamp not null,

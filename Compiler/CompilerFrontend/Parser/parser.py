@@ -186,8 +186,6 @@ class Parser:
         else:
             raise SyntaxError(f"Expected a valid datatype, but found {self.current_token[1]}")
 
-
-
     def _parse_foreign_key(self):
         """
         Parses a foreign key definition.
