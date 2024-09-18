@@ -1,8 +1,8 @@
 const {getAllConnections, getLeaderConnection, getConnection} = require('../Socket/connectionStorage');
 const {consensusTypes} = require('../enums');
 const webSocket = require('ws');
-const {getLatestId, getAllByStartId, insertWithDate} = require('../DB/initial/consensus_Node_Log');
-const {dbInteraction} = require('../DB/initial/dbInteraction');
+const {getLatestId, getAllByStartId, insertWithDate} = require('../DB/consensus_Node_Log');
+const {dbInteraction} = require('../DB/dbInteraction');
 
 const sendHeartbeat = async (fastify) => {
     const connections = getAllConnections();

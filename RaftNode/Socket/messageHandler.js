@@ -3,7 +3,7 @@ const {addConnection} = require('./connectionStorage');
 const {getConsensus} = require('../Consensus/session');
 const {handleLeaderElection, handleVoteResponse, publishLeaderElection} = require('../Consensus/leaderElection');
 const {handleHeartbeat, handleMissingLog, insertMissingLog} = require('../Consensus/heartbeat');
-const {dbInteraction} = require('../DB/initial/dbInteraction');
+const {dbInteraction} = require('../DB/dbInteraction');
 
 //handles the messages from connectionIn and connectionOut
 const handleMessage = (fastify, message, ws) => {
