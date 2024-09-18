@@ -3,12 +3,13 @@ import sys
 from CompilerFrontend.Lexer.lexer import Lexer
 from CompilerFrontend.Parser.parser import Parser
 from CompilerFrontend.Parser.print_tree import PrintTree
+from CompilerBackend.sql_code_generator import SQLCodeGenerator
 
 
 
 def check_arguments():
     """
-    Check command line arguments for the source file.
+    Check command line arguments for the source file
     """
     if len(sys.argv) != 2:
         sys.exit("Error: Compiler needs source file as argument.")
@@ -59,6 +60,13 @@ def process_database_schema(parse_tree):
         del database_schema['rest_block']
     return database_schema
 
+def generate_sql_code(database_schema):
+    """
+    Generate SQL code from the database schema
+    """
+    sql_generator = SQLCodeGenerator(database_schema)
+    return sql_generator.generate()
+
 def main():
     print("ForgeAPI Compiler")
     
@@ -67,12 +75,21 @@ def main():
     tokens = initialize_lexer(source)
     parse_tree = parse_tokens(tokens)
     
+    # Extract endpoint data
     endpoint_data = extract_endpoint_data(parse_tree)
     # print(endpoint_data)
+
+    # Extract database schema
+    database_schema = process_database_schema(parse_tree)
+    #print(database_schema)
+
+    # Generate SQL code
+    sql_code = generate_sql_code(database_schema)
+    print(sql_code)    
     
-    # Uncomment to print the formatted parse tree
+    # Printing the formated parse tree
     printed_tree = PrintTree(parse_tree)
-    print(printed_tree)
+    #print(printed_tree)
 
 if __name__ == "__main__":
     main()
