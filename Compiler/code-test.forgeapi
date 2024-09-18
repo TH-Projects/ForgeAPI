@@ -1,4 +1,9 @@
 DATABASE mycompany {
+    TABLE departments {
+        COLUMN dept_id auto_id PK not null,
+        COLUMN dept_name string(255) not null
+    }
+    
     TABLE employees {
         COLUMN emp_id auto_id PK not null,
         COLUMN first_name string(100) not null,
@@ -8,11 +13,6 @@ DATABASE mycompany {
         COLUMN salary float,
         COLUMN hire_date timestamp not null,
         FK (departments.dept_id)
-    }
-
-    TABLE departments {
-        COLUMN dept_id auto_id PK not null,
-        COLUMN dept_name string(255) not null
     }
 
     REST {

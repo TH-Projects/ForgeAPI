@@ -3,13 +3,13 @@ import sys
 from CompilerFrontend.Lexer.lexer import Lexer
 from CompilerFrontend.Parser.parser import Parser
 from CompilerFrontend.Parser.print_tree import PrintTree
-from CompilerFrontend.sql_code_generator import SQLCodeGenerator
+from CompilerBackend.sql_code_generator import SQLCodeGenerator
 
 
 
 def check_arguments():
     """
-    Check command line arguments for the source file.
+    Check command line arguments for the source file
     """
     if len(sys.argv) != 2:
         sys.exit("Error: Compiler needs source file as argument.")
@@ -53,14 +53,17 @@ def extract_endpoint_data(parse_tree):
 
 def process_database_schema(parse_tree):
     """
-    Create and return a deep copy of the parse tree with endpoint data removed."""
+    Create and return a deep copy of the parse tree with endpoint data removed
+    """
     database_schema = copy.deepcopy(parse_tree)
     if 'rest_block' in database_schema:
         del database_schema['rest_block']
     return database_schema
 
 def generate_sql_code(database_schema):
-    """Generate SQL code from the database schema."""
+    """
+    Generate SQL code from the database schema
+    """
     sql_generator = SQLCodeGenerator(database_schema)
     return sql_generator.generate()
 
@@ -84,7 +87,7 @@ def main():
     sql_code = generate_sql_code(database_schema)
     print(sql_code)    
     
-    # Uncomment to print the formatted parse tree
+    # Printing the formated parse tree
     printed_tree = PrintTree(parse_tree)
     #print(printed_tree)
 

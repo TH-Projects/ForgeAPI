@@ -1,8 +1,9 @@
-import copy
+SQL_GENERATOR_VERSION = 1.0
 
 class SQLCodeGenerator:
     def __init__(self, schema):
         self.schema = schema
+        #mapping of ForgeAPI datatypes to SQL datatypes
         self.datatype_mapping = {
             'string': 'VARCHAR',
             'integer': 'INT',
@@ -14,11 +15,14 @@ class SQLCodeGenerator:
         }
 
     def generate(self):
-        # Validierung des Schemas
+        """
+        Generate SQL code from the database schema
+        """
+        # Validate the schema
         if not self._is_valid_schema(self.schema):
             raise ValueError("Schema must be of type 'database'")
         
-        # Erzeuge SQL für jede Tabelle
+        # Create SQL statements for each table
         sql_statements = []
         tables = self.schema.get('tables', [])
         if not tables:
@@ -31,12 +35,18 @@ class SQLCodeGenerator:
         return "\n\n".join(sql_statements)
     
     def _is_valid_schema(self, schema):
+        """
+        Check if the schema is valid
+        """
         if schema.get('type') != 'database':
             print(f"Invalid schema type: {schema.get('type')}")
             return False
         return True
     
     def _generate_create_table(self, table):
+        """
+        Generate a SQL statement for a table
+        """
         table_name = table.get('name')
         if not table_name:
             raise ValueError("Table name is missing.")
@@ -44,14 +54,14 @@ class SQLCodeGenerator:
         columns = table.get('columns', [])
         foreign_keys = table.get('foreign_keys', [])
         
-        # Erzeuge SQL CREATE TABLE Statement
+        # Create SQL statement for table creation
         sql = f"CREATE TABLE {table_name} (\n"
         
-        # Spalten-Definitionen
+        # Column definitions
         column_definitions = []
         for column in columns:
             col_name = column.get('name')
-            col_type = self._map_datatype(column.get('datatype', 'TEXT'))  # Standarddatentyp TEXT
+            col_type = self._map_datatype(column.get('datatype', 'TEXT'))  # Default datatype is TEXT (only one supported currently)
             primary_key = 'PRIMARY KEY' if column.get('primary_key') else ''
             not_null = 'NOT NULL' if column.get('not_null') else ''
             column_definitions.append(f"  {col_name} {col_type} {primary_key} {not_null}".strip())
@@ -77,7 +87,10 @@ class SQLCodeGenerator:
         return sql
 
     def _map_datatype(self, datatype):
-        # Mappt die Datentypen auf MariaDB-konforme Datentypen
+        """
+        Maps the ForgeAPI datatype to a SQL datatype
+        Compatilbe for mariaDB
+        """
         if 'string' in datatype:
             size = self._extract_size(datatype)
             return f"VARCHAR({size})"
@@ -87,7 +100,9 @@ class SQLCodeGenerator:
             raise ValueError(f"Unsupported datatype: {datatype}")
 
     def _extract_size(self, datatype):
-        # Extrahiert die Größe für den Datentyp string
+        """
+        Extracts the size of a string datatype
+        """
         import re
         match = re.search(r'\((\d+)\)', datatype)
         if match:
