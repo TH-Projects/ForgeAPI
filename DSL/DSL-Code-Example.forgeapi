@@ -18,7 +18,7 @@ DATABASE mycompany {
     REST {
         % Endpoints for employees table
         get /employees,                 % Fetches all employee records
-        get /employees?first_name, % Fetches employees by first name
+        get /employees?first_name&last_name % Fetches employees by first name
         post /employees,                % Adds a new employee
         put /employees?emp_id,        % Updates an employee by ID
         delete /employees?emp_id,     % Deletes an employee by ID

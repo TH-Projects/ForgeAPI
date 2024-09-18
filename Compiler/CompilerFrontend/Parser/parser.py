@@ -236,16 +236,21 @@ class Parser:
         Parses a single REST endpoint definition, including HTTP method and URL.
 
         - Returns:
-          A dictionary representing a single REST endpoint.
+        A dictionary representing a single REST endpoint.
         """
         method = self._expect(TokenDefinition.GET, TokenDefinition.POST, TokenDefinition.PUT, TokenDefinition.DELETE)  # HTTP method
         url = self._expect(TokenDefinition.URL)  # URL path
         
-        # Optionally, handle URL parameters (e.g., /employees?first_name)
+        # Optionally, handle URL parameters (e.g., /employees?first_name&last_name)
         query_params = []
         if self.current_token[0] == TokenDefinition.QUESTION_MARK:
             self._advance()  # Consume '?'
-            query_params.append(self._expect(TokenDefinition.IDENTIFIER))  # Expect query parameter
+            query_params.append(self._expect(TokenDefinition.IDENTIFIER))  # Expect first query parameter
+
+            # Consume additional parameters, separated by '&'
+            while self.current_token[0] == TokenDefinition.AMPERSAND:
+                self._advance()  # Consume '&'
+                query_params.append(self._expect(TokenDefinition.IDENTIFIER))  # Expect next query parameter
 
         return {
             "type": "endpoint",

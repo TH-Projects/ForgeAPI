@@ -34,6 +34,7 @@ class TokenDefinition(enum.Enum):
     COMMA = r','
     DOT = r'\.'
     SLASH = r'/'
+    AMPERSAND = r'&'
     QUESTION_MARK = r'\?'
     WS = r'\s+'  # Whitespace Token
     NEWLINE = r'\n'

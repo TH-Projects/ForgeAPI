@@ -48,10 +48,10 @@ foreign_key ::= "FK" "(" tablename "." columnname ")"
 rest_block ::= "REST" "{" rest_endpoint+ "}"
 
 // Defines a REST endpoint with a method, URL, and optional parameters
-rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter+ )?
+rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter ( "&" parameter )* )?
 
-// Defines a parameter as an identifier followed by an equals sign and another identifier
-parameter ::= identifier "=" identifier
+// Defines a parameter as an identifier
+parameter ::= identifier
 
 // Defines the NOT NULL constraint
 not_null ::= "not" "null"
