@@ -6,7 +6,6 @@ from CompilerFrontend.Parser.print_tree import PrintTree
 from CompilerBackend.sql_code_generator import SQLCodeGenerator
 
 
-
 def check_arguments():
     """
     Check command line arguments for the source file
@@ -67,6 +66,19 @@ def generate_sql_code(database_schema):
     sql_generator = SQLCodeGenerator(database_schema)
     return sql_generator.generate()
 
+def write_sql_to_file(sql_code, output_file_path):
+    """
+    Write the generated SQL code to a file, overwriting it if it exists
+    """
+    try:
+        # Write the SQL code to the file
+        print(f"Writing SQL code to {output_file_path}")
+        with open(output_file_path, 'w') as outputFile:
+            outputFile.write(sql_code)
+        print(f"SQL code successfully written to {output_file_path}")
+    except IOError as e:
+        sys.exit(f"Error writing to file: {e}")
+
 def main():
     print("ForgeAPI Compiler")
     
@@ -85,9 +97,12 @@ def main():
 
     # Generate SQL code
     sql_code = generate_sql_code(database_schema)
-    print(sql_code)    
+        
+    # Write SQL code to file
+    output_file_path = "./DB/schema.sql"
+    write_sql_to_file(sql_code, output_file_path)
     
-    # Printing the formated parse tree
+    # Print the formatted parse tree
     printed_tree = PrintTree(parse_tree)
     #print(printed_tree)
 
