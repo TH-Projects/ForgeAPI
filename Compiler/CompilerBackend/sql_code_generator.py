@@ -1,9 +1,9 @@
-SQL_GENERATOR_VERSION = 1.0
+SQL_GENERATOR_VERSION = 1.1
 
 class SQLCodeGenerator:
     def __init__(self, schema):
         self.schema = schema
-        #mapping of ForgeAPI datatypes to SQL datatypes
+        # Mapping of ForgeAPI datatypes to SQL datatypes
         self.datatype_mapping = {
             'string': 'VARCHAR',
             'integer': 'INT',
@@ -22,8 +22,17 @@ class SQLCodeGenerator:
         if not self._is_valid_schema(self.schema):
             raise ValueError("Schema must be of type 'database'")
         
-        # Create SQL statements for each table
+        # Extract database name
+        database_name = self.schema.get('name')
+        if not database_name:
+            raise ValueError("Database name is missing in the schema.")
+
+        # Create SQL statements for creating the database and using it
         sql_statements = []
+        sql_statements.append(f"CREATE DATABASE IF NOT EXISTS {database_name};")
+        sql_statements.append(f"USE {database_name};")
+        
+        # Create SQL statements for each table
         tables = self.schema.get('tables', [])
         if not tables:
             print("Warning: No tables found in schema.")
@@ -89,7 +98,7 @@ class SQLCodeGenerator:
     def _map_datatype(self, datatype):
         """
         Maps the ForgeAPI datatype to a SQL datatype
-        Compatilbe for mariaDB
+        Compatible for MariaDB
         """
         if 'string' in datatype:
             size = self._extract_size(datatype)
