@@ -19,6 +19,7 @@ class Parser:
         Moves to the next token in the list of tokens.
         Updates the current token to the next one in the sequence.
         """
+
         self.current_token_index += 1  # Move to the next token index
         if self.current_token_index < len(self.tokens):
             self.current_token = self.tokens[self.current_token_index]  # Update the current token
@@ -32,13 +33,13 @@ class Parser:
         If it does not match, raises a SyntaxError.
 
         - Parameters:
-          expected_tokens: One or more tokens to expect (can be passed as multiple arguments).
+        expected_tokens: One or more tokens to expect (can be passed as multiple arguments).
 
         - Returns:
-          The value of the current token if it matches, otherwise raises a SyntaxError.
+        The value of the current token if it matches, otherwise raises a SyntaxError.
         """
         current_token = self.current_token[0]  # Get the type of the current token
-        
+
         # Check if the current token matches any of the expected tokens
         if current_token in expected_tokens:
             token_value = self.current_token[1]  # Get the value of the token
@@ -48,6 +49,7 @@ class Parser:
             # Raise a SyntaxError with information about the expected and actual tokens
             expected_names = ', '.join([repr(token) for token in expected_tokens])
             raise SyntaxError(f"Expected one of {expected_names}, but found {repr(self.current_token[1])}")
+
 
     def parse(self):
         """
@@ -131,7 +133,6 @@ class Parser:
 
         # Initialize optional attributes
         primary_key = False
-        foreign_key = False
         not_null = False
 
         # Check for optional attributes like PK, FK, and NOT NULL
@@ -139,13 +140,9 @@ class Parser:
             if self.current_token[0] == TokenDefinition.PK:
                 primary_key = True
                 self._advance()  # Consume 'PK'
-            elif self.current_token[0] == TokenDefinition.FK:
-                foreign_key = True
-                self._advance()  # Consume 'FK'
             elif self.current_token[0] == TokenDefinition.NOT_NULL:
                 not_null = True
                 self._advance()  # Consume 'NOT NULL'
-
         return {
             "type": "column",
             "name": columnname,
@@ -159,26 +156,37 @@ class Parser:
         Parses the datatype of a column, including possible size for string types.
 
         - Returns:
-          A string representing the datatype of the column.
+        A string representing the datatype of the column.
         """
+
+        # Check if there is a current token available for parsing
+        if not self.current_token:
+            raise SyntaxError("No current token available for parsing.")
+
         datatype_token = self.current_token[0]  # Get the type of the current token
-        
+
         # Check if the datatype is valid
         if datatype_token in (TokenDefinition.STRING, TokenDefinition.INTEGER, TokenDefinition.FLOAT,
                             TokenDefinition.BOOLEAN, TokenDefinition.DATE, TokenDefinition.TIMESTAMP,
                             TokenDefinition.AUTO_ID):  # Include AUTO_ID here
-            datatype = self._advance()  # Consume the datatype token (e.g., 'string', 'integer', 'auto_id')
+
+            # Consume the datatype token and get its value
+            datatype_value = self._expect(datatype_token)  # This should get the value of the datatype token
 
             # Check if it's a datatype that requires parentheses, like string(100)
-            if datatype_token == TokenDefinition.STRING and self.current_token[0] == TokenDefinition.LPAREN:
+            if datatype_token == TokenDefinition.STRING and self.current_token and self.current_token[0] == TokenDefinition.LPAREN:
                 self._expect(TokenDefinition.LPAREN)  # Expect '('
                 size = self._expect(TokenDefinition.NUMBER)  # Expect a number inside the parentheses
                 self._expect(TokenDefinition.RPAREN)  # Expect ')'
-                datatype = f"{datatype}({size})"  # Format datatype with size
+                datatype = f"{datatype_value}({size})"  # Format datatype with size
+            else:
+                datatype = datatype_value
 
             return datatype
         else:
             raise SyntaxError(f"Expected a valid datatype, but found {self.current_token[1]}")
+
+
 
     def _parse_foreign_key(self):
         """
