@@ -6,7 +6,7 @@ from CompilerFrontend.Parser.parser import Parser
 from CompilerFrontend.Parser.print_tree import PrintTree
 from CompilerBackend.sql_code_generator import SQLCodeGenerator
 from CompilerBackend.nodejs_endpoint_generator import NodeJSCodeGenerator
-
+from CompilerBackend.appjs_route_generation import AppJSRouteGenerator
 
 def check_arguments():
     """
@@ -140,29 +140,35 @@ def main():
     
     # Extract endpoint data
     endpoint_data = extract_endpoint_data(parse_tree)
-    #print(endpoint_data)
 
     # Extract database schema
     database_schema = process_database_schema(parse_tree)
-    #print(database_schema)
 
     # Generate SQL code
-    #sql_code = generate_sql_code(database_schema)
+    sql_code = generate_sql_code(database_schema)
         
     # Write SQL code to file
     output_file_path = "./DB/schema.sql"
-    #write_sql_to_file(sql_code, output_file_path)
+    write_sql_to_file(sql_code, output_file_path)
 
     # Generate Node.js code
     endpoint_output_dir = "./RaftNode/REST"
     nodejs_generator = NodeJSCodeGenerator(endpoint_data)
     nodejs_code = nodejs_generator.generate_code()
-    #write_endpoints_to_files(nodejs_code, endpoint_output_dir)
-    print_endpoint_data(nodejs_code)
+    write_endpoints_to_files(nodejs_code, endpoint_output_dir)
+
+    # Register routes in app.js
+    app_js_path = "./RaftNode/app.js"
+    app_js_generator = AppJSRouteGenerator(app_js_path)
+    app_js_generator.register_routes(endpoint_data)
+
     
-    # Print the formatted parse tree
-    printed_tree = PrintTree(parse_tree)
+    # Print the formatted parse tree for debugging
+    #printed_tree = PrintTree(parse_tree)
     #print(printed_tree)
+
+    # Print endpoint data and generated code for debugging
+    #print_endpoint_data(nodejs_code)
 
 if __name__ == "__main__":
     main()

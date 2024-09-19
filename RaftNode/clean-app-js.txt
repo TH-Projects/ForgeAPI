@@ -19,15 +19,6 @@ fastify.decorate('serverId', serverId);
 fastify.decorate('totalCount', totalCount);
 
 // Register Routes -> This part is generated automatically
-fastify.register(require('./Rest/employees/getAllEmployees'));
-fastify.register(require('./Rest/employees/getEmployeesByName'));
-fastify.register(require('./Rest/employees/postEmployees'));
-fastify.register(require('./Rest/employees/putEmployees'));
-fastify.register(require('./Rest/employees/deleteEmployee'));
-fastify.register(require('./Rest/departments/getDepartments'));
-fastify.register(require('./Rest/departments/postDepartments'));
-fastify.register(require('./Rest/departments/deleteDepartments'));
-
 
 // Start Server
 const start = async () => {
