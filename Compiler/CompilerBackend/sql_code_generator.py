@@ -1,4 +1,4 @@
-SQL_GENERATOR_VERSION = 1.1
+SQL_GENERATOR_VERSION = 1.2
 
 class SQLCodeGenerator:
     def __init__(self, schema):
@@ -17,6 +17,7 @@ class SQLCodeGenerator:
     def generate(self):
         """
         Generate SQL code from the database schema
+        :return: generated SQL code
         """
         # Validate the schema
         if not self._is_valid_schema(self.schema):
@@ -40,12 +41,16 @@ class SQLCodeGenerator:
         for table in tables:
             if table.get('type') == 'table':
                 sql_statements.append(self._generate_create_table(table))
+
+        sql_statements.append(self.add_consensus_log_table())
         
         return "\n\n".join(sql_statements)
     
     def _is_valid_schema(self, schema):
         """
         Check if the schema is valid
+        :param schema: Schema dictionary
+        :return: True if the schema is valid, False otherwise
         """
         if schema.get('type') != 'database':
             print(f"Invalid schema type: {schema.get('type')}")
@@ -55,6 +60,8 @@ class SQLCodeGenerator:
     def _generate_create_table(self, table):
         """
         Generate a SQL statement for a table
+        :param table: Table dictionary
+        :return: SQL statement for creating the table
         """
         table_name = table.get('name')
         if not table_name:
@@ -99,6 +106,8 @@ class SQLCodeGenerator:
         """
         Maps the ForgeAPI datatype to a SQL datatype
         Compatible for MariaDB
+        :param datatype: ForgeAPI datatype string
+        :return: SQL datatype string
         """
         if 'string' in datatype:
             size = self._extract_size(datatype)
@@ -111,9 +120,24 @@ class SQLCodeGenerator:
     def _extract_size(self, datatype):
         """
         Extracts the size of a string datatype
+        :param datatype: ForgeAPI datatype string
+        :return: Size of the datatype
         """
         import re
         match = re.search(r'\((\d+)\)', datatype)
         if match:
             return match.group(1)
         return '255'  # Default size if not specified
+    
+    def add_consensus_log_table(self):
+        """
+        Add a Consensus_Node_Log table to the schema
+        :return: SQL code for creating the Consensus_Node_Log table
+        """
+        return(
+             "CREATE TABLE Consensus_Node_Log (\n"
+            "Id SERIAL PRIMARY KEY,\n"
+            "Command TEXT NOT NULL,\n"
+            "Commandtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n"
+            ");\n"
+        )
