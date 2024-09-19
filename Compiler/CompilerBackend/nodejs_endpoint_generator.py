@@ -1,4 +1,4 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.0'
+NODEJ_CODE_GENERATOR_VERSION = '1.1'
 
 class NodeJSCodeGenerator:
     def __init__(self, endpoint_data):
@@ -55,6 +55,24 @@ class NodeJSCodeGenerator:
         
         return sql_query
 
+    def generate_parmeter_validation(self, query_params):
+        """
+        Generates the parameter validation code for the query parameters
+
+        :param query_param: List of query parameters.
+        :return: The generated code in JavaScript notation for Fastify servers.
+        """
+        validation_code = ""
+        for param in query_params:
+            validation_code += f"    if (!{param}) {{\n"
+            validation_code += f"       return res.code(400).send(\n"
+            validation_code += f"           {{\n"
+            validation_code += f"               success: false,\n"
+            validation_code += f"               message: 'Missing required parameter {param}'\n"
+            validation_code += f"           }}\n"
+            validation_code += f"    }}\n"
+        return validation_code
+
     def generate_endpoint_code(self, table_name, method, url, query_params):
         """
         Generates the code for a single endpoint based on the table name, HTTP method, URL, and query parameters
@@ -66,31 +84,47 @@ class NodeJSCodeGenerator:
         :return: The generated code in JavaScript notation for Fastify servers.
         """
         query_params_code = self.format_query_params(query_params)
+        parameter_validation_code = self.generate_parmeter_validation(query_params)
         
         # Templating module and endpoint function
         endpoint_code = (
             f"const TARGET_TABLE = '{table_name}';\n\n"
             f"const {url.replace('/', '')} = async (fastify) => {{\n"
-            f"  fastify.{method}('{url}', async (req, res) => {{\n"
+            f"  fastify.{method}('{url}', async (req, res) => {{\n\n"
         )
 
-        # Templating endpoint body
+        # Templating parameters and validation if query parameters are present
         if query_params_code:
-            endpoint_code += f"    const {query_params_code};\n"
-        endpoint_code += (
-            f"    const sql_query = `{self.generate_sql_query(table_name, method, query_params)}`;\n"
-            f"    // Placeholder for sending the SQL query to Consensus\n"
-            f"    res.send('{method.upper()} {url}'"
-        )
-        if query_params:
             endpoint_code += (
-                f" + 'no http response available yet');\n"
+                f"    // Destructure query params\n"
+                f"    const {query_params_code};\n"
+                f"{parameter_validation_code}\n\n"
             )
+        
+        # Templating SQL query
+        endpoint_code += (
+            f"    // Sending the SQL query to the consensus and validate the response\n"
+            f"    const sql_query = `{self.generate_sql_query(table_name, method, query_params)}`;\n"
+            f"    const queryResult = await consensus.query(sql_query, query_params);  // Placeholder: Target function not implemented yes\n"
+            f"    if (!queryResult.success) {{\n"
+            f"        return res.code(500).send(queryResult);\n"
+            f"    }}\n\n"
+        )
+        # Templating success response
+        endpoint_code += (
+            f"    // Return the query result\n"
+            f"    return res.code(200).send(\n"
+            f"        {{\n"
+            f"            success: true,\n"
+            f"            data: queryResult\n"
+            f"        }}\n"
+            f"    );\n"
+        )
 
         # Templating closing brackets for module and endpoint function
         endpoint_code += (
             f"  }});\n"
-            f"}};\n"
+            f"}};\n\n"
         )
         # Export the endpoint function
         endpoint_code += f"module.exports = {url.replace('/', '')};\n"
