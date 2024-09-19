@@ -64,12 +64,13 @@ class NodeJSCodeGenerator:
         """
         validation_code = ""
         for param in query_params:
-            validation_code += f"    if (!{param}) {{\n"
+            validation_code += f"    if ({param} === undefined) {{\n"
             validation_code += f"       return res.code(400).send(\n"
             validation_code += f"           {{\n"
             validation_code += f"               success: false,\n"
             validation_code += f"               message: 'Missing required parameter {param}'\n"
             validation_code += f"           }}\n"
+            validation_code += f"       );\n"
             validation_code += f"    }}\n"
         return validation_code
 
@@ -88,7 +89,6 @@ class NodeJSCodeGenerator:
         
         # Templating module and endpoint function
         endpoint_code = (
-            f"const TARGET_TABLE = '{table_name}';\n\n"
             f"const {url.replace('/', '')} = async (fastify) => {{\n"
             f"  fastify.{method}('{url}', async (req, res) => {{\n\n"
         )
@@ -98,14 +98,15 @@ class NodeJSCodeGenerator:
             endpoint_code += (
                 f"    // Destructure query params\n"
                 f"    const {query_params_code};\n"
-                f"{parameter_validation_code}\n\n"
+                f"    const paramList = [{', '.join(query_params)}];\n"
+                f"{parameter_validation_code}\n"
             )
         
         # Templating SQL query
         endpoint_code += (
             f"    // Sending the SQL query to the consensus and validate the response\n"
             f"    const sql_query = `{self.generate_sql_query(table_name, method, query_params)}`;\n"
-            f"    const queryResult = await consensus.query(sql_query, query_params);  // Placeholder: Target function not implemented yes\n"
+            f"    const queryResult = await consensus.query(sql_query, paramList);  // Placeholder: Target function not implemented yes\n"
             f"    if (!queryResult.success) {{\n"
             f"        return res.code(500).send(queryResult);\n"
             f"    }}\n\n"
