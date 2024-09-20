@@ -1,10 +1,13 @@
+const {getConnection} = require('./connection');
+
 const tableName = 'Consensus_Node_Log';
 
 // Get all data from the table
 const getAll = async (fastify) => {
-    const client = await fastify.pg.connect();
     try {
-        const { rows } = await client.query(`SELECT * FROM ${tableName}`);
+        const db = await getConnection(fastify);
+        const [ rows ] = await db.query(`SELECT * FROM ${tableName}`);
+        db.release();
         return {
             success: true,
             data: rows,
@@ -15,16 +18,17 @@ const getAll = async (fastify) => {
             success: false
         };
     }
-    finally {
-        client.release();
-    }
 }
 
 // Insert data into the table
-const insert = async (fastify, query, values) => {
-    const client = await fastify.pg.connect();
+const insert = async (fastify, command) => {
     try {
-        const { rows } = await client.query(query, values);
+        const query = `INSERT INTO ${tableName} (command) VALUES (?) RETURNING id`;
+        const values = [command];
+        const db = await getConnection(fastify);
+        const rows = await db.query(query, values);
+        db.release();
+        console.log('Rows: ', rows);
         if(rows.length > 0){
             return {
                 success: true,
@@ -41,41 +45,23 @@ const insert = async (fastify, query, values) => {
             success: false
         };
     }
-    finally {
-        client.release();
-    }
-}
-
-//Insert data into the table with date
-const insertWithDate = async (fastify, command, date) => {
-    const query = `INSERT INTO ${tableName} (command, commandtime) VALUES ($1, $2) RETURNING id`;
-    const values = [command, date];
-    console.log('Inserting data command: ', command, ' date: ', date);
-    return insert(fastify, query, values);
-}
-
-
-//Insert data into the table without date
-const insertWithoutDate = async (fastify, command) => {
-    const query = `INSERT INTO ${tableName} (command) VALUES ($1) RETURNING id`;
-    const values = [command];
-    return insert(fastify, query, values);
 }
 
 // Get the latest id from the table
 const getLatestId = async (fastify) => {
-    const client = await fastify.pg.connect();
     try {
-        const { rows } = await client.query(`SELECT id FROM ${tableName} ORDER BY id DESC LIMIT 1`);
-        if(rows.length > 0){
+        const db = await getConnection(fastify);
+        const [ rows ] = await db.query(`SELECT id FROM ${tableName} ORDER BY id DESC LIMIT 1`);
+        db.release();
+        if(rows){
             return {
                 success: true,
-                data: rows[0].id,
+                data: rows.id,
             };
         }
-        console.log('Error getting data');
         return {
-            success: false
+            success: true,
+            data: 0,
     };
     } catch (err) {
         console.log(err);
@@ -83,19 +69,17 @@ const getLatestId = async (fastify) => {
             success: false
         };
     }
-    finally {
-        client.release();
-    }
 }
 
 // Get all data from the table starting from a specific id
 const getAllByStartId = async (fastify, startId) => {
-    const client = await fastify.pg.connect();
     try {
-        const { rows } = await client.query(`SELECT * FROM ${tableName} WHERE id > $1`, [startId]);
+        const db = await getConnection(fastify);
+        const [ rows ] = await db.query(`SELECT * FROM ${tableName} WHERE id > ?`, [startId]);
+        db.release();
         return {
             success: true,
-            data: rows,
+            data: Array.of(rows),
         };
     } catch (err) {
         console.log(err);
@@ -103,15 +87,30 @@ const getAllByStartId = async (fastify, startId) => {
             success: false
         };
     }
-    finally {
-        client.release();
+}
+
+const getById = async (fastify, id) => {
+    try {
+        const db = await getConnection(fastify);
+        const [ rows ] = await db.query(`SELECT * FROM ${tableName} WHERE id = ?`, [id]);
+        console.log('RowsByID: ', rows);
+        db.release();
+        return {
+            success: true,
+            data: Array.of(rows),
+        };
+    } catch (err) {
+        console.log(err);
+        return {
+            success: false
+        };
     }
 }
 
 module.exports = {
     getAll,
-    insertWithDate,
-    insertWithoutDate,
+    insert,
     getLatestId,
-    getAllByStartId
+    getAllByStartId,
+    getById
 }

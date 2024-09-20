@@ -3,7 +3,8 @@ const {addConnection} = require('./connectionStorage');
 const {getConsensus} = require('../Consensus/session');
 const {handleLeaderElection, handleVoteResponse, publishLeaderElection} = require('../Consensus/leaderElection');
 const {handleHeartbeat, handleMissingLog, insertMissingLog} = require('../Consensus/heartbeat');
-const {dbInteraction} = require('../DB/dbInteraction');
+const {applyLog} = require('../DB/dbInteraction');
+const {handleVotingRequest, handleVotingResponse} = require('../Consensus/consensusVoting');
 
 //handles the messages from connectionIn and connectionOut
 const handleMessage = (fastify, message, ws) => {
@@ -47,6 +48,18 @@ const handleMessage = (fastify, message, ws) => {
             // Handle the append log
             insertMissingLog(fastify, payload);
             break;
+        case consensusTypes.REQUESTCONSENSUSVOTING:
+            // Handle the request consensus voting
+            handleVotingRequest(fastify, payload);
+            break;
+        case consensusTypes.RESPONSECONSENSUSVOTING:
+            // Handle the response consensus voting
+            handleVotingResponse(payload);
+            break;
+        case consensusTypes.APPLYLOG:
+            // Handle the apply log
+            applyLog(fastify, payload.logId);
+            break;
         default:
             console.log('Invalid message type');
     }
@@ -67,7 +80,6 @@ const updateLeader = (serverId) => {
         consensus.stopsSelectLeaderTimeout();
         consensus.setLeader(serverId);
     }
-
 }
 
 //handle heartbeat and check current logId

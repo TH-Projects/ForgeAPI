@@ -1,8 +1,15 @@
 -- Erstellen der Tabelle Konsensus_Node_Log
+USE konsensus_db;
+
 CREATE TABLE Consensus_Node_Log (
-    Id SERIAL PRIMARY KEY,
-    Command TEXT NOT NULL,
-    Commandtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    command TEXT NOT NULL
 );
 
-INSERT INTO Consensus_Node_Log (Command) VALUES ('CREATE TABLE Konsensus_Node_Log');
+CREATE TABLE TEST (
+    Id SERIAL PRIMARY KEY,
+    abc INT NOT NULL
+);
+
+INSERT INTO Consensus_Node_Log (Command)
+VALUES ('CREATE TABLE Konsensus_Node_Log');
