@@ -1,4 +1,4 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.2'
+NODEJ_CODE_GENERATOR_VERSION = '1.3'
 
 class NodeJSCodeGenerator:
     def __init__(self, endpoint_data):
@@ -135,12 +135,7 @@ class NodeJSCodeGenerator:
         # Templating success response
         endpoint_code += (
             f"        // Return the query result\n"
-            f"        return res.code(200).send(\n"
-            f"            {{\n"
-            f"                success: true,\n"
-            f"                data: queryResult\n"
-            f"            }}\n"
-            f"        );\n"
+            f"        return res.code(200).send(queryResult);\n"
         )
 
         # Templating closing brackets for module and endpoint function
