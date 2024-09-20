@@ -137,7 +137,6 @@ class SQLCodeGenerator:
         return(
              "CREATE TABLE Consensus_Node_Log (\n"
             "Id SERIAL PRIMARY KEY,\n"
-            "Command TEXT NOT NULL,\n"
-            "Commandtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n"
+            "Command TEXT NOT NULL\n"
             ");\n"
         )
