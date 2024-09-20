@@ -1,6 +1,6 @@
 from CompilerFrontend.Lexer.lexer import TokenDefinition
 
-PARSER_VERSION = 1.0
+PARSER_VERSION = 1.2
 
 class Parser:
     def __init__(self, tokens):
@@ -215,23 +215,47 @@ class Parser:
         self._expect(TokenDefinition.REST)  # Expect 'REST'
         self._expect(TokenDefinition.LBRACE)  # Expect '{'
 
-        rest_endpoints = []  # List to hold REST endpoints
-        
-        # Loop through the REST endpoints until hitting the closing brace
-        while self.current_token[0] != TokenDefinition.RBRACE:
-            rest_endpoints.append(self._parse_rest_endpoint())  # Parse REST endpoints and add to the list
+        rest_tables = []  # List to hold REST table definitions
+
+        while self.current_token and self.current_token[0] != TokenDefinition.RBRACE:
+            rest_tables.append(self._parse_rest_table())  # Parse REST tables and add to the list
             
-            # Check if there's a comma after the current endpoint and consume it
-            if self.current_token[0] == TokenDefinition.COMMA:
+            # Check if there's a comma after the current table and consume it
+            if self.current_token and self.current_token[0] == TokenDefinition.COMMA:
                 self._advance()  # Consume the comma
-            
+
         self._expect(TokenDefinition.RBRACE)  # Expect '}'
         return {
             "type": "rest",
-            "endpoints": rest_endpoints
+            "tables": rest_tables
         }
 
-    def _parse_rest_endpoint(self):
+    def _parse_rest_table(self):
+        """
+        Parses a single table block within the REST block.
+
+        - Returns:
+        A dictionary representing a single table block with endpoints.
+        """
+        table_name = self._expect(TokenDefinition.IDENTIFIER)  # Expect table name
+        self._expect(TokenDefinition.LBRACE)  # Expect '{'
+
+        endpoints = []  # List to hold REST endpoints
+
+        while self.current_token and self.current_token[0] in (TokenDefinition.GET, TokenDefinition.POST, TokenDefinition.PUT, TokenDefinition.DELETE):
+            endpoints.append(self._parse_rest_endpoint(table_name))  # Parse REST endpoints and add to the list
+            
+            # Check if there's a comma after the current endpoint and consume it
+            if self.current_token and self.current_token[0] == TokenDefinition.COMMA:
+                self._advance()  # Consume the comma
+
+        self._expect(TokenDefinition.RBRACE)  # Expect '}'
+        return {
+            "table": table_name,
+            "endpoints": endpoints
+        }
+
+    def _parse_rest_endpoint(self, table_name):
         """
         Parses a single REST endpoint definition, including HTTP method and URL.
 
@@ -243,33 +267,19 @@ class Parser:
         
         # Optionally, handle URL parameters (e.g., /employees?first_name&last_name)
         query_params = []
-        if self.current_token[0] == TokenDefinition.QUESTION_MARK:
+        if self.current_token and self.current_token[0] == TokenDefinition.QUESTION_MARK:
             self._advance()  # Consume '?'
             query_params.append(self._expect(TokenDefinition.IDENTIFIER))  # Expect first query parameter
 
             # Consume additional parameters, separated by '&'
-            while self.current_token[0] == TokenDefinition.AMPERSAND:
+            while self.current_token and self.current_token[0] == TokenDefinition.AMPERSAND:
                 self._advance()  # Consume '&'
                 query_params.append(self._expect(TokenDefinition.IDENTIFIER))  # Expect next query parameter
 
         return {
             "type": "endpoint",
+            "table": table_name,  # Include the table name
             "method": method,
             "url": url,
             "query_params": query_params
         }
-
-    def _parse_parameters(self):
-        """
-        Parses a list of parameters in a REST endpoint.
-
-        - Returns:
-          A list of tuples representing parameters (name, value).
-        """
-        parameters = []
-        while self.current_token[0] == TokenDefinition.IDENTIFIER:
-            param_name = self._expect(TokenDefinition.IDENTIFIER)  # Parameter name
-            self._expect(TokenDefinition.EQUALS)  # Expect '='
-            param_value = self._expect(TokenDefinition.IDENTIFIER)  # Parameter value
-            parameters.append((param_name, param_value))  # Add the parameter to the list
-        return parameters

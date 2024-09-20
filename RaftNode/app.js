@@ -5,6 +5,8 @@ const consensus = require('./Consensus/Consensus');
 const { addConsensus } = require('./Consensus/session');
 require('dotenv').config();
 
+const registerRoutes = require('./routes');
+
 // Register Fastify Plugins
 fastify.register(require('@fastify/postgres'), {
     connectionString: `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.DB_HOST}:5432/${process.env.POSTGRES_DB}`,
@@ -21,6 +23,10 @@ fastify.decorate('totalCount', totalCount);
 // Start Server
 const start = async () => {
     try {
+        // Register Routes
+        await registerRoutes(fastify);
+
+        // Start Server
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
         connectionIn(fastify);
         await buildUpConnections(fastify);

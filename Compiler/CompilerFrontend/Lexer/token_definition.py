@@ -28,7 +28,7 @@ class TokenDefinition(enum.Enum):
     LPAREN = r'\('
     RPAREN = r'\)'
     EQUALS = r'='
-    URL = r'/[a-zA-Z_][a-zA-Z_0-9]*'
+    URL = r'/[a-zA-Z_][a-zA-Z_0-9]*(/[a-zA-Z_][a-zA-Z_0-9]*)*'  # Allows multiple segments in URL
     IDENTIFIER = r'[a-zA-Z_][a-zA-Z_0-9]*'
     NUMBER = r'\d+'
     COMMA = r','
