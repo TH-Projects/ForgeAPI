@@ -1,4 +1,4 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.1'
+NODEJ_CODE_GENERATOR_VERSION = '1.2'
 
 class NodeJSCodeGenerator:
     def __init__(self, endpoint_data):
@@ -55,6 +55,27 @@ class NodeJSCodeGenerator:
         
         return sql_query
 
+    def generate_query_processing(self, method, query_params):
+        """
+        Generates the processing code for the query based on the HTTP method and query parameters
+        :param method: HTTP method (GET, POST, PUT, DELETE)
+        :param query_params: List of query parameters
+        :return: JavaScript code for processing the query
+        """
+        processing_code = ""
+
+        if method == 'get' and query_params == []:
+            processing_code = f"const queryResult = await consensusVoting.get(fastify, sql_query);\n"
+        elif method == 'get' and query_params != []:
+            processing_code = f"const queryResult = await consensusVoting.get(fastify, sql_query, paramList);\n"
+        else:
+            processing_code = f"const queryResult = await consensusVoting.post(fastify, sql_query, paramList);\n"
+        
+        processing_code += f"        if (!queryResult.success) {{\n"
+        processing_code += f"            return res.code(500).send(queryResult);\n"
+        processing_code += f"        }}\n"
+        return processing_code
+    
     def generate_parmeter_validation(self, query_params):
         """
         Generates the parameter validation code for the query parameters
@@ -64,14 +85,14 @@ class NodeJSCodeGenerator:
         """
         validation_code = ""
         for param in query_params:
-            validation_code += f"    if ({param} === undefined) {{\n"
-            validation_code += f"       return res.code(400).send(\n"
-            validation_code += f"           {{\n"
-            validation_code += f"               success: false,\n"
-            validation_code += f"               message: 'Missing required parameter {param}'\n"
-            validation_code += f"           }}\n"
-            validation_code += f"       );\n"
-            validation_code += f"    }}\n"
+            validation_code += f"        if ({param} === undefined) {{\n"
+            validation_code += f"            return res.code(400).send(\n"
+            validation_code += f"                {{\n"
+            validation_code += f"                  success: false,\n"
+            validation_code += f"                  message: 'Missing required parameter {param}'\n"
+            validation_code += f"                }}\n"
+            validation_code += f"            );\n"
+            validation_code += f"        }}\n"
         return validation_code
 
     def generate_endpoint_code(self, table_name, method, url, query_params):
@@ -86,45 +107,45 @@ class NodeJSCodeGenerator:
         """
         query_params_code = self.format_query_params(query_params)
         parameter_validation_code = self.generate_parmeter_validation(query_params)
+        sql_query_code = self.generate_sql_query(table_name, method, query_params)
+        query_processing_code = self.generate_query_processing(method, query_params)
         
         # Templating module and endpoint function
         endpoint_code = (
+            f"const consensusVoting = require('../Consensus/consensusVoting');\n\n"
             f"const {url.replace('/', '')} = async (fastify) => {{\n"
-            f"  fastify.{method}('{url}', async (req, res) => {{\n\n"
+            f"    fastify.{method}('{url}', async (req, res) => {{\n\n"
         )
 
         # Templating parameters and validation if query parameters are present
         if query_params_code:
             endpoint_code += (
-                f"    // Destructure query params\n"
-                f"    const {query_params_code};\n"
-                f"    const paramList = [{', '.join(query_params)}];\n"
+                f"        // Destructure query params\n"
+                f"        const {query_params_code};\n"
+                f"        const paramList = [{', '.join(query_params)}];\n"
                 f"{parameter_validation_code}\n"
             )
         
         # Templating SQL query
         endpoint_code += (
-            f"    // Sending the SQL query to the consensus and validate the response\n"
-            f"    const sql_query = `{self.generate_sql_query(table_name, method, query_params)}`;\n"
-            f"    const queryResult = await consensus.query(sql_query, paramList);  // Placeholder: Target function not implemented yes\n"
-            f"    if (!queryResult.success) {{\n"
-            f"        return res.code(500).send(queryResult);\n"
-            f"    }}\n\n"
+            f"        // Sending the SQL query to the consensus and validate the response\n"
+            f"        const sql_query = `{sql_query_code}`;\n"
+            f"        {query_processing_code}\n"
         )
         # Templating success response
         endpoint_code += (
-            f"    // Return the query result\n"
-            f"    return res.code(200).send(\n"
-            f"        {{\n"
-            f"            success: true,\n"
-            f"            data: queryResult\n"
-            f"        }}\n"
-            f"    );\n"
+            f"        // Return the query result\n"
+            f"        return res.code(200).send(\n"
+            f"            {{\n"
+            f"                success: true,\n"
+            f"                data: queryResult\n"
+            f"            }}\n"
+            f"        );\n"
         )
 
         # Templating closing brackets for module and endpoint function
         endpoint_code += (
-            f"  }});\n"
+            f"    }});\n"
             f"}};\n\n"
         )
         # Export the endpoint function
