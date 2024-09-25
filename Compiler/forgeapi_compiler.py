@@ -6,7 +6,8 @@ from CompilerFrontend.Parser.parser import Parser
 from CompilerFrontend.Parser.print_tree import PrintTree
 from CompilerBackend.sql_code_generator import SQLCodeGenerator
 from CompilerBackend.nodejs_endpoint_generator import NodeJSCodeGenerator
-from CompilerBackend.appjs_route_generation import AppJSRouteGenerator
+from CompilerBackend.appjs_route_generator import AppJSRouteGenerator
+from CompilerBackend.env_generator import EnvGenerator
 
 def check_arguments():
     """
@@ -140,11 +141,27 @@ def write_endpoints_to_files(endpoint_data, endpoint_output_dir):
         for endpoint in endpoints:
             file_name = endpoint['url'].strip('/').replace('/', '_') + '.js'
             file_path = os.path.join(table_dir, file_name)
+            try:
+                with open(file_path, 'w') as file:
+                    file.write(endpoint['generated_code'])
+                print(f"File '{file_name}' was created in '{table_name}' folder")
+            except IOError as e:
+                sys.exit(f"Error writing to file: {e}")
             
-            with open(file_path, 'w') as file:
-                file.write(endpoint['generated_code'])
-            
-            print(f"Datei '{file_name}' wurde in '{table_name}' erstellt.")
+
+def write_env_to_file(env_content, env_file_path):
+    """
+    Write the generated environment variables to a file, overwriting it if it exists
+    :param env_content: The environment variables to write
+    :param env_file_path: The path to the output file
+    """
+    try:
+        # Write the environment variables to the file
+        with open(env_file_path, 'w') as outputFile:
+            outputFile.write(env_content)
+        print(f"Environment variables successfully written to {env_file_path}")
+    except IOError as e:
+        sys.exit(f"Error writing to file: {e}")
 
 def main():
     print("ForgeAPI Compiler")
@@ -162,10 +179,15 @@ def main():
 
     # Generate SQL code
     sql_code = generate_sql_code(database_schema)
-        
-    # Write SQL code to file
     output_file_path = "./DB/schema.sql"
     write_sql_to_file(sql_code, output_file_path)
+
+    # Generate environment variables for database
+    database_name = database_schema.get('name')
+    env_generator = EnvGenerator(database_name)
+    env_content = env_generator.generate_env_content()
+    env_file_path = "./.env"
+    write_env_to_file(env_content, env_file_path)
 
     # Generate Node.js code
     endpoint_output_dir = "./RaftNode/REST"
