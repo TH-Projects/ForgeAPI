@@ -135,8 +135,8 @@ class SQLCodeGenerator:
         :return: SQL code for creating the Consensus_Node_Log table
         """
         return(
-             "CREATE TABLE Consensus_Node_Log (\n"
-            "Id SERIAL PRIMARY KEY,\n"
-            "Command TEXT NOT NULL\n"
+            "CREATE TABLE Consensus_Node_Log (\n"
+            "id SERIAL PRIMARY KEY,\n"
+            "command TEXT NOT NULL\n"
             ");\n"
         )
