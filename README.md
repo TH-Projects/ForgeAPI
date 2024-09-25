@@ -92,7 +92,7 @@ The DSL supports various data types for columns:
 - `date`: A date without time.
 - `timestamp`: A date with time.
 
-### 3.4 - Schema Defintion Example
+### 3.4 - Schema Definition Example
 
 ```dsl
 DATABASE mycompany {
@@ -134,7 +134,7 @@ REST {
 - `/url_path`: The path of the REST endpoint.
 - `params` (optional): Parameters that can be passed to the endpoint. Can be concatinated by `&`
 
-### 4.2 - REST Enpoint Definition Example
+### 4.2 - REST Endpoint Definition Example
 
 ```dsl
 REST {
