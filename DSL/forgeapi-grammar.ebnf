@@ -37,7 +37,6 @@ datatype ::=  "auto_id"  // Equivalent to SQL's SERIAL
             | "boolean"
             | "date"
             | "timestamp"
-// Add other SQL data types as needed
 
 // Indicates a primary key for the column
 primary_key ::= "PK"
@@ -45,14 +44,17 @@ primary_key ::= "PK"
 // Defines a foreign key with the table and column it references
 foreign_key ::= "FK" "(" tablename "." columnname ")"
 
-// Defines a block for REST endpoints with one or more endpoints
-rest_block ::= "REST" "{" rest_endpoint+ "}"
+// Defines a block for REST endpoints related to specific tables
+rest_block ::= "REST" "{" rest_table+ "}"
+
+// Associates a table with its REST endpoints
+rest_table ::= tablename "{" rest_endpoint+ "}"
 
 // Defines a REST endpoint with a method, URL, and optional parameters
-rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter+ )?
+rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter ( "&" parameter )* )?
 
-// Defines a parameter as an identifier followed by an equals sign and another identifier
-parameter ::= identifier "=" identifier
+// Defines a parameter as an identifier
+parameter ::= identifier
 
 // Defines the NOT NULL constraint
 not_null ::= "not" "null"
@@ -61,17 +63,18 @@ not_null ::= "not" "null"
 dbname ::= identifier
 tablename ::= identifier
 columnname ::= identifier
-url ::= "/" identifier
+url ::= "/" identifier ( "/" identifier )* // Allows multiple segments
+identifier ::= letter (letter | digit)* 
+              & !reserved_keyword // Ensure identifier is not a reserved keyword
 
 // Defines the length for a string data type as one or more digits
 length ::= digit+
-
-// Defines an identifier as a letter followed by zero or more letters or digits, but not a reserved keyword
-identifier ::= letter (letter | digit)* 
-              & !reserved_keyword // Ensure identifier is not a reserved keyword
 
 // Defines a letter as any uppercase or lowercase English letter
 letter ::= "a" | ... | "z" | "A" | ... | "Z"
 
 // Defines a digit as any numeral from 0 to 9
 digit ::= "0" | ... | "9"
+
+// Defines a comment starting with % and continuing to the end of the line
+comment ::= "%" .*  // Matches a percent symbol followed by any characters to the end of the line
