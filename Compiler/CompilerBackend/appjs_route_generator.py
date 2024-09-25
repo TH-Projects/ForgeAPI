@@ -31,7 +31,7 @@ class AppJSRouteGenerator:
         
         for table in data['tables']:
             for endpoint in table['endpoints']:
-                generated_routes += f"    fastify.register(require('./Rest/{endpoint['table']}{endpoint['url']}'));\n"
+                generated_routes += f"    fastify.register(require('./REST/{endpoint['table']}{endpoint['url']}'));\n"
         
         generated_routes += "};\n"
         return generated_routes
