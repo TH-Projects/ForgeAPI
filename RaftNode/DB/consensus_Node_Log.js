@@ -89,6 +89,7 @@ const getAllByStartId = async (fastify, startId) => {
     }
 }
 
+// Get data from the table by id
 const getById = async (fastify, id) => {
     try {
         const db = await getConnection(fastify);
@@ -107,10 +108,29 @@ const getById = async (fastify, id) => {
     }
 }
 
+// Delete data from the table by id
+const deleteLog = async (fastify, id) => {
+    try {
+        const db = await getConnection(fastify);
+        const [ rows ] = await db.query(`DELETE FROM ${tableName} WHERE id = ?`, [id]);
+        db.release();
+        return {
+            success: true,
+            data: rows,
+        };
+    } catch (err) {
+        console.log(err);
+        return {
+            success: false
+        };
+    }
+}
+
 module.exports = {
     getAll,
     insert,
     getLatestId,
     getAllByStartId,
-    getById
+    getById,
+    deleteLog
 }

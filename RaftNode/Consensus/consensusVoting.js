@@ -4,13 +4,13 @@ const crypto = require('crypto');
 const webSocket = require('ws');
 const {dbInteraction} = require('../DB/dbInteraction');
 const {getConsensus} = require('./session');
-const {insert} = require('../DB/consensus_Node_Log');
+const {insert, deleteLog} = require('../DB/consensus_Node_Log');
 
 const votes = new Map();
 let ownHash = null;
 let data = null;
 
-// Hande a REST Request which is a SELECT DB-request
+// Hande a Rest Request which is a SELECT DB-request
 const get = async (fastify, query, values = null) => {
     // Check if the node is the leader
     const leader = checkLeaderStatus(fastify);
@@ -37,7 +37,7 @@ const get = async (fastify, query, values = null) => {
     return await waitForResponse();
 }
 
-// Hande a REST Request which is NOT a SELECT DB-request
+// Hande a Rest Request which is NOT a SELECT DB-request
 // First send message to all Nodes to create a Log Entry
 // Second create own Data and Hash
 // Third wait for all Nodes to respond
@@ -71,7 +71,9 @@ const post = async (fastify, query, values) => {
 
     const response = await waitForResponse();
     if(!response.success){
-        //TODO: revert log for other nodes
+        // Send a revert message to all nodes
+        revertLog(fastify, data.data);
+        await deleteLog(fastify, data.data);
         return {
             success: false,
             data: 'Consensus failed'
@@ -88,7 +90,9 @@ const post = async (fastify, query, values) => {
 
     const dbInteractionResponse = await dbInteraction(fastify, query, values);
     if(!dbInteractionResponse.success){
-        //TODO: revert log for other nodes
+        // Send a revert message to all nodes
+        revertLog(fastify, data.data);
+        await deleteLog(fastify, data.data);
         return {
             success: false,
             data: 'Error inserting data'
@@ -101,6 +105,17 @@ const post = async (fastify, query, values) => {
         success: true,
         data: dbInteractionResponse.data
     }
+}
+
+// Create a message to revert the log and send it to all nodes
+const revertLog = (fastify, logId) => {
+    const message = {
+        type: consensusTypes.DELETELOG,
+        payload: {
+            logId: logId
+        }
+    }
+    sendMessageToAllNodes(message);
 }
 
 // Send a given message to all nodes
@@ -182,6 +197,7 @@ const waitForResponse = async () => {
                 // Check if the hash is the same as the leader hash
                 if(maxKey === ownHash){
                     // Success
+                    console.log('Consensus success with hash: ', maxKey, ' Votes: ', maxVotes);
                     return {
                         success: true,
                         data: data.data
@@ -202,7 +218,7 @@ const generateHash = (data) => {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }
 
-// Only the leader is allowed to accept REST requests
+// Only the leader is allowed to accept Rest requests
 const checkLeaderStatus = (fastify) => {
     const consensus = getConsensus();
     const leader = consensus.getLeader();

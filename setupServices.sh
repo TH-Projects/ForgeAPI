@@ -29,7 +29,7 @@ do
       - .env
     volumes:
       - db_data_${i}:/var/lib/mysql
-      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./DB/schema.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "$((5432 + i)):3306"
 EOL
