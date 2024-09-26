@@ -3,7 +3,7 @@ const {getAllConnections, getConnectionCount, getConnection} = require('../Socke
 const crypto = require('crypto');
 const webSocket = require('ws');
 const {dbInteraction} = require('../DB/dbInteraction');
-const {getConsensus} = require('./session');
+let {getConsensus, currentLogId} = require('./session');
 const {insert, deleteLog} = require('../DB/consensus_Node_Log');
 
 const votes = new Map();
@@ -148,6 +148,7 @@ const handleVotingRequest = async (fastify, payload) => {
     }
     else if(payload.method === dbMethods.POST){
         const response = await insert(fastify, {query: payload.query, values: payload.values});
+        currentLogId = response.data;
         const hash = generateHash(response);
         await responseVoting(fastify, hash);
     }

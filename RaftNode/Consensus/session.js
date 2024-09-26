@@ -1,5 +1,7 @@
 let consensusStorage = null;
 
+let currentLogId = null;
+
 // Add a connection to the storage
 const addConsensus = (consensus) => {
     consensusStorage = consensus;
@@ -18,5 +20,6 @@ const getConsensus = () => {
 module.exports = {
     addConsensus,
     removeConsensus,
-    getConsensus
+    getConsensus,
+    currentLogId
 }

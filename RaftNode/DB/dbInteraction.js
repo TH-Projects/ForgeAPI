@@ -1,5 +1,6 @@
 const { getConnection } = require('./connection');
 const {getById} = require('./consensus_Node_Log');
+let {currentLogId} = require("../Consensus/session");
 
 // Interact with the database with the given query and values of the consensus leader
 const dbInteraction = async (fastify, query, values) => {
@@ -49,6 +50,7 @@ const applyLog = async (fastify, logId) => {
     console.log('Command: ', command);
     const commandJson = JSON.parse(command);
     await dbInteraction(fastify, commandJson.query, commandJson.values ?? null);
+    currentLogId = null;
 }
 
 module.exports = {
