@@ -80,6 +80,21 @@ def process_database_schema(parse_tree):
         del database_schema['rest_block']
     return database_schema
 
+def write_sql_to_file(sql_code, output_file_path):
+    """
+    Write the generated SQL code to a file, overwriting it if it exists
+    :param sql_code: The SQL code to write
+    :param output_file_path: The path to the output file
+    """
+    try:
+        logging.info(f"Writing SQL code to {output_file_path}")
+        with open(output_file_path, 'w') as outputFile:
+            outputFile.write(sql_code)
+        logging.info(f"SQL code successfully written to {output_file_path}")
+    except IOError as e:
+        logging.error(f"Error writing to file: {e}")
+        sys.exit(1)
+
 def print_endpoint_data(endpoint_data):
     """
     Print the endpoint data and generated code for debugging
@@ -95,29 +110,6 @@ def print_endpoint_data(endpoint_data):
         print("Generated Code:\n")
         print(endpoint['generated_code'])
         print("\n" + "=" * 40 + "\n")
-
-def get_auto_id_columns(database_schema):
-    auto_id_columns = []
-    for table in database_schema.get('tables', []):
-        for column in table.get('columns', []):
-            if column.get('datatype') == 'auto_id':
-                auto_id_columns.append(column['name'])
-    return auto_id_columns
-
-def write_sql_to_file(sql_code, output_file_path):
-    """
-    Write the generated SQL code to a file, overwriting it if it exists
-    :param sql_code: The SQL code to write
-    :param output_file_path: The path to the output file
-    """
-    try:
-        logging.info(f"Writing SQL code to {output_file_path}")
-        with open(output_file_path, 'w') as outputFile:
-            outputFile.write(sql_code)
-        logging.info(f"SQL code successfully written to {output_file_path}")
-    except IOError as e:
-        logging.error(f"Error writing to file: {e}")
-        sys.exit(1)
 
 def write_endpoints_to_files(endpoint_data, endpoint_output_dir):
     """
@@ -190,9 +182,6 @@ def main():
     output_file_path = "./DB/schema.sql"
     write_sql_to_file(sql_code, output_file_path)
 
-    # Get auto_id columns of database schema
-    auto_id_columns = get_auto_id_columns(database_schema)
-
     # Generate environment variables for database
     database_name = database_schema.get('name')
     env_generator = EnvGenerator(database_name)
@@ -202,8 +191,7 @@ def main():
 
     # Generate Node.js code
     endpoint_output_dir = "./RaftNode/REST"
-    nodejs_generator = NodeJSCodeGenerator(auto_id_columns, endpoint_data)
-    print(endpoint_data)
+    nodejs_generator = NodeJSCodeGenerator(endpoint_data)
     nodejs_code = nodejs_generator.generate_code()
     write_endpoints_to_files(nodejs_code, endpoint_output_dir)
 
