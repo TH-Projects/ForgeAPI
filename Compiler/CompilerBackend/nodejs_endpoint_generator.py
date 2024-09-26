@@ -156,7 +156,6 @@ class NodeJSCodeGenerator:
     def generate_code(self):
         """
         Generates the code for all endpoints based on the provided endpoint data.
-        
         Filters out parameters that are both primary keys and auto_id columns for each table.
         
         :return: List of dictionaries containing endpoint data, including table name, URL, method, query parameters, and generated code.
@@ -169,14 +168,10 @@ class NodeJSCodeGenerator:
                 method = endpoint['method']
                 url = endpoint['url']
                 query_params = endpoint['query_params']
-                print(query_params)
-                print(primary_key)
-                
+               
                 # Filter params: exclude those that are both auto_id and the primary key
                 filtered_params = [param for param in query_params 
-                                if not (param == primary_key and param in self.auto_id_columns)]
-
-                print(filtered_params)
+                                if not (param == primary_key and param in self.auto_id_columns and method == 'post')]
 
                 # Generate the code for each endpoint
                 code = self.generate_endpoint_code(table_name, method, url, filtered_params)
