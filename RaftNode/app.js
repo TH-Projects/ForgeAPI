@@ -21,7 +21,7 @@ const start = async () => {
     try {
         // Register Routes
         await registerRoutes(fastify);
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 15000));
         await dbConnection.register(fastify);
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
         connectionIn(fastify);

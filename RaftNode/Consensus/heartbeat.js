@@ -3,6 +3,7 @@ const {consensusTypes} = require('../enums');
 const webSocket = require('ws');
 const {getLatestId, getAllByStartId, insert} = require('../DB/consensus_Node_Log');
 const {dbInteraction} = require('../DB/dbInteraction');
+const {currentLogId} = require('./session');
 
 const sendHeartbeat = async (fastify) => {
     const connections = getAllConnections();
@@ -36,6 +37,9 @@ const handleHeartbeat = async (fastify, payload) => {
     if(!logId.success)
         return;
     if(logId.data >= payloadLogId){
+        return;
+    }
+    if(currentLogId !== null){
         return;
     }
     console.log('Missing log detected LogId: ', logId.data);
