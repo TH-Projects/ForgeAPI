@@ -1,8 +1,9 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.4'
+NODEJ_CODE_GENERATOR_VERSION = '1.4.1'
 
 class NodeJSCodeGenerator:
-    def __init__(self, endpoint_data):
+    def __init__(self, auto_id_column, endpoint_data):
         self.endpoint_data = endpoint_data
+        self.auto_id_columns = auto_id_column
         self.generated_endpoints = []  # List to store the generated endpoints
 
     def format_query_params(self, method, query_params):
@@ -163,16 +164,17 @@ class NodeJSCodeGenerator:
                 method = endpoint['method']
                 url = endpoint['url']
                 query_params = endpoint['query_params']
+                filtered_params = [param for param in query_params if param not in self.auto_id_columns]
 
                 # Generate the code for each endpoint
-                code = self.generate_endpoint_code(table_name, method, url, query_params)
+                code = self.generate_endpoint_code(table_name, method, url, filtered_params)
                 
                 # Apply the generated code to the endpoint_object list
                 endpoint_object = {
                     'table': table_name,
                     'method': method,
                     'url': url,
-                    'query_params': query_params,
+                    'query_params': filtered_params,
                     'generated_code': code
                 }
                 self.generated_endpoints.append(endpoint_object)
