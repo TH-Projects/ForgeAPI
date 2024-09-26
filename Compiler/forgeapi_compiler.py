@@ -97,12 +97,12 @@ def print_endpoint_data(endpoint_data):
         print("\n" + "=" * 40 + "\n")
 
 def get_auto_id_columns(database_schema):
-    auto_id_columns = []
-    for table in database_schema.get('tables', []):
-        for column in table.get('columns', []):
-            if column.get('datatype') == 'auto_id':
-                auto_id_columns.append(column['name'])
-    return auto_id_columns
+     auto_id_columns = []
+     for table in database_schema.get('tables', []):
+         for column in table.get('columns', []):
+             if column.get('datatype') == 'auto_id':
+                 auto_id_columns.append(column['name'])
+     return auto_id_columns
 
 def write_sql_to_file(sql_code, output_file_path):
     """
@@ -190,7 +190,7 @@ def main():
     output_file_path = "./DB/schema.sql"
     write_sql_to_file(sql_code, output_file_path)
 
-    # Get auto_id columns of database schema
+    # Get auto_id columns
     auto_id_columns = get_auto_id_columns(database_schema)
 
     # Generate environment variables for database
@@ -203,7 +203,6 @@ def main():
     # Generate Node.js code
     endpoint_output_dir = "./RaftNode/REST"
     nodejs_generator = NodeJSCodeGenerator(auto_id_columns, endpoint_data)
-    print(endpoint_data)
     nodejs_code = nodejs_generator.generate_code()
     write_endpoints_to_files(nodejs_code, endpoint_output_dir)
 

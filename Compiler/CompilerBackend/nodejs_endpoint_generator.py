@@ -1,32 +1,27 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.5'
+NODEJ_CODE_GENERATOR_VERSION = '1.4.1'
 
 class NodeJSCodeGenerator:
-    def __init__(self, auto_id_columns, endpoint_data):
+    def __init__(self, auto_id_column, endpoint_data):
         self.endpoint_data = endpoint_data
-        self.auto_id_columns = auto_id_columns
+        self.auto_id_columns = auto_id_column
         self.generated_endpoints = []  # List to store the generated endpoints
 
-    def format_query_params(self, method, query_params, auto_id_columns):
+    def format_query_params(self, method, query_params):
         """
-        Formats the query parameters as a string for the generated code,
-        excluding those that are in the auto_id_columns list.
+        Formats the query parameters as a string for the generated code
+        Getting parameters by object descructuring
 
-        :param method: HTTP method (e.g., 'get', 'post').
         :param query_params: List of query parameters.
-        :param auto_id_columns: List of column names to exclude.
         :return: The formatted query parameters as a string.
         """
 
         if query_params:
-            # Filter out the parameters that are in auto_id_columns
-            filtered_params = [param for param in query_params if param not in auto_id_columns]
-
-            if method == 'get':
-                return f"{{ {', '.join(filtered_params)} }} = req.query"
+            if  method == 'get':
+                return f"{{ {', '.join(query_params)} }} = req.query"
             else:
-                return f"{{ {', '.join(filtered_params)} }} = req.body"
+                return f"{{ {', '.join(query_params)} }} = req.body"
         return ""
-
+    
     def generate_sql_query(self, table_name, method, query_params):
         """
         Generates an SQL statement based on the HTTP method, table name, URL, and query parameters.
@@ -86,19 +81,15 @@ class NodeJSCodeGenerator:
         processing_code += f"        }}\n"
         return processing_code
     
-    def generate_parmeter_validation(self, auto_id_columns, query_params):
+    def generate_parmeter_validation(self, query_params):
         """
         Generates the parameter validation code for the query parameters
 
-        :param auto_id_columns: List of auto-increment columns
-        :param query_param: List of query parameters
+        :param query_param: List of query parameters.
         :return: The generated code in JavaScript notation for Fastify servers.
         """
         validation_code = ""
         for param in query_params:
-            if param in auto_id_columns:
-                continue
-
             validation_code += f"        if ({param} === undefined) {{\n"
             validation_code += f"            return res.code(400).send(\n"
             validation_code += f"                {{\n"
@@ -109,7 +100,7 @@ class NodeJSCodeGenerator:
             validation_code += f"        }}\n"
         return validation_code
 
-    def generate_endpoint_code(self, auto_id_columns, table_name, method, url, query_params):
+    def generate_endpoint_code(self, table_name, method, url, query_params):
         """
         Generates the code for a single endpoint based on the table name, HTTP method, URL, and query parameters
 
@@ -119,8 +110,8 @@ class NodeJSCodeGenerator:
         :param query_params: List of query parameters.
         :return: The generated code in JavaScript notation for Fastify servers.
         """
-        query_params_code = self.format_query_params(method, query_params, auto_id_columns)
-        parameter_validation_code = self.generate_parmeter_validation(auto_id_columns , query_params)
+        query_params_code = self.format_query_params(method, query_params)
+        parameter_validation_code = self.generate_parmeter_validation(query_params)
         sql_query_code = self.generate_sql_query(table_name, method, query_params)
         query_processing_code = self.generate_query_processing(method, query_params)
         
@@ -173,16 +164,17 @@ class NodeJSCodeGenerator:
                 method = endpoint['method']
                 url = endpoint['url']
                 query_params = endpoint['query_params']
+                filtered_params = [param for param in query_params if param not in self.auto_id_columns]
 
                 # Generate the code for each endpoint
-                code = self.generate_endpoint_code( self.auto_id_columns, table_name, method, url, query_params)
+                code = self.generate_endpoint_code(table_name, method, url, filtered_params)
                 
                 # Apply the generated code to the endpoint_object list
                 endpoint_object = {
                     'table': table_name,
                     'method': method,
                     'url': url,
-                    'query_params': query_params,
+                    'query_params': filtered_params,
                     'generated_code': code
                 }
                 self.generated_endpoints.append(endpoint_object)
