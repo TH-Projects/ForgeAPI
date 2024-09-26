@@ -104,6 +104,20 @@ def get_auto_id_columns(database_schema):
                  auto_id_columns.append(column['name'])
      return auto_id_columns
 
+def get_primary_keys(database_schema):
+    """
+    Get the primary keys for each table in the database schema
+    :param database_schema: The parse tree representing the database schema
+    :return: A dictionary where the keys are table names and values are the primary key column names
+    """
+    primary_keys = {}
+    for table in database_schema.get('tables', []):
+        for column in table.get('columns', []):
+            if column.get('primary_key', False):
+                primary_keys[table['name']] = column['name']
+                break  # Assuming only one primary key per table
+    return primary_keys
+
 def write_sql_to_file(sql_code, output_file_path):
     """
     Write the generated SQL code to a file, overwriting it if it exists
@@ -184,6 +198,9 @@ def main():
     # Extract database schema
     database_schema = process_database_schema(parse_tree)
 
+    # Get primary keys for tables
+    primary_keys = get_primary_keys(database_schema)
+
     # Generate SQL code
     sql_generator = SQLCodeGenerator(database_schema)
     sql_code = sql_generator.generate()
@@ -202,7 +219,7 @@ def main():
 
     # Generate Node.js code
     endpoint_output_dir = "./RaftNode/REST"
-    nodejs_generator = NodeJSCodeGenerator(auto_id_columns, endpoint_data)
+    nodejs_generator = NodeJSCodeGenerator(auto_id_columns, primary_keys, endpoint_data)
     nodejs_code = nodejs_generator.generate_code()
     write_endpoints_to_files(nodejs_code, endpoint_output_dir)
 
