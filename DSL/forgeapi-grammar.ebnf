@@ -1,0 +1,80 @@
+// Reserved keywords that cannot be used as identifiers
+reserved_keyword ::= "DATABASE"
+                  | "TABLE"
+                  | "COLUMN"
+                  | "auto_id"
+                  | "string"
+                  | "integer"
+                  | "float"
+                  | "boolean"
+                  | "date"
+                  | "timestamp"
+                  | "PK"
+                  | "FK"
+                  | "REST"
+                  | "get"
+                  | "post"
+                  | "put"
+                  | "delete"
+                  | "not"
+                  | "null"
+                  | "Consensus_Node_Log" // Forbidden because it is a reserved default table name
+
+// Defines a database with a name, one or more tables, and optional REST endpoints
+database ::= "DATABASE" dbname "{" table+ (rest_block)? "}"
+
+// Defines a table with a name, one or more columns, optional foreign keys
+table ::= "TABLE" tablename "{" column+ foreign_key* "}"
+
+// Defines a column with a name, data type, optional primary key indicator, and optional NOT NULL constraint
+column ::= "COLUMN" columnname datatype (primary_key | ",")? (not_null)?
+
+// Defines various data types, including custom ones for serial and Varchar
+datatype ::=  "auto_id"  // Equivalent to SQL's SERIAL
+            | "string(" length ")"  // Equivalent to SQL's VARCHAR(x)
+            | "integer"
+            | "float"
+            | "boolean"
+            | "date"
+            | "timestamp"
+
+// Indicates a primary key for the column
+primary_key ::= "PK"
+
+// Defines a foreign key with the table and column it references
+foreign_key ::= "FK" "(" tablename "." columnname ")"
+
+// Defines a block for REST endpoints related to specific tables
+rest_block ::= "REST" "{" rest_table+ "}"
+
+// Associates a table with its REST endpoints
+rest_table ::= tablename "{" rest_endpoint+ "}"
+
+// Defines a REST endpoint with a method, URL, and optional parameters
+rest_endpoint ::= ("get" | "post" | "put" | "delete") url ( "?" parameter ( "&" parameter )* )?
+
+// Defines a parameter as an identifier
+parameter ::= identifier
+
+// Defines the NOT NULL constraint
+not_null ::= "not" "null"
+
+// Definitions for identifiers, including names for databases, tables, columns, and URLs
+dbname ::= identifier
+tablename ::= identifier
+columnname ::= identifier
+url ::= "/" identifier ( "/" identifier )* // Allows multiple segments
+identifier ::= letter (letter | digit)* 
+              & !reserved_keyword // Ensure identifier is not a reserved keyword
+
+// Defines the length for a string data type as one or more digits
+length ::= digit+
+
+// Defines a letter as any uppercase or lowercase English letter
+letter ::= "a" | ... | "z" | "A" | ... | "Z"
+
+// Defines a digit as any numeral from 0 to 9
+digit ::= "0" | ... | "9"
+
+// Defines a comment starting with % and continuing to the end of the line
+comment ::= "%" .*  // Matches a percent symbol followed by any characters to the end of the line

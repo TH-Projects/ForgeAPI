@@ -1,0 +1,1 @@
+All generated endpoints can be found in this folder

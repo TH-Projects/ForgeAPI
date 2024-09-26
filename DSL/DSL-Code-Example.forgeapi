@@ -1,0 +1,35 @@
+DATABASE mycompany {
+    TABLE departments {
+        COLUMN dept_id auto_id PK not null,
+        COLUMN dept_name string(255) not null
+    }
+    
+    TABLE employees {
+        COLUMN emp_id auto_id PK not null,
+        COLUMN first_name string(100) not null,
+        COLUMN last_name string(100) not null,
+        COLUMN dept_id integer not null,
+        COLUMN birth_date date,
+        COLUMN salary float,
+        COLUMN hire_date timestamp not null,
+        FK (departments.dept_id)
+    }
+
+    REST {
+        employees{
+            % Endpoints for employees table
+            get /getAllEmployees,                                                                % Fetches all employee records
+            get /getEmployeesByName?first_name&last_name                                         % Fetches employees by first name
+            post /postEmployees?emp_id&first_name&last_name&dept_id&birth_date&salary&hire_date, % Adds a new employee
+            put /putEmployees?emp_id,                                                            % Updates an employee by ID
+            delete /deleteEmployee?emp_id,                                                       % Deletes an employee by ID
+        }
+
+        departments{
+             % Endpoints for departments table
+            get /getDepartments,                        % Fetches all department records
+            post /postDepartments?dept_id&dept_name,    % Adds a new department
+            delete /deleteDepartments?dept_name         % Deletes departments by name
+        }
+    }
+}
