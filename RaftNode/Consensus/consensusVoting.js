@@ -10,7 +10,7 @@ const votes = new Map();
 let ownHash = null;
 let data = null;
 
-// Hande a Rest Request which is a SELECT DB-request
+// Hande a REST Request which is a SELECT DB-request
 const get = async (fastify, query, values = null) => {
     // Check if the node is the leader
     const leader = checkLeaderStatus(fastify);
@@ -37,7 +37,7 @@ const get = async (fastify, query, values = null) => {
     return await waitForResponse();
 }
 
-// Hande a Rest Request which is NOT a SELECT DB-request
+// Hande a REST Request which is NOT a SELECT DB-request
 // First send message to all Nodes to create a Log Entry
 // Second create own Data and Hash
 // Third wait for all Nodes to respond
@@ -218,7 +218,7 @@ const generateHash = (data) => {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }
 
-// Only the leader is allowed to accept Rest requests
+// Only the leader is allowed to accept REST requests
 const checkLeaderStatus = (fastify) => {
     const consensus = getConsensus();
     const leader = consensus.getLeader();
