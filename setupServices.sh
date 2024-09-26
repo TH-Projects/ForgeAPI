@@ -16,6 +16,13 @@ if [ ! -f "$FILE_PATH" ]; then
     exit 1
 fi
 
+# Delete generated Files
+rm -rf ./RaftNode/REST/*
+
+# Clear Docker
+docker compose down
+docker volume rm $(docker volume ls -q)
+
 # Execute the compiler script with the provided file path
 if ! python3 ./Compiler/forgeapi_compiler.py "$FILE_PATH"; then
     echo "Error: The Python script failed to run."
@@ -24,6 +31,9 @@ fi
 
 # Create the Docker Compose file
 DOCKER_COMPOSE_FILE="docker-compose.yml"
+
+# Remove the Docker Compose file
+rm $DOCKER_COMPOSE_FILE
 
 # Set environment variables in the Docker Compose file
 cat <<EOL > $DOCKER_COMPOSE_FILE
@@ -84,8 +94,5 @@ done
 
 # Start the containers
 docker-compose up -d --build
-
-# Remove the Docker Compose file
-rm $DOCKER_COMPOSE_FILE
 
 echo "Started: $INSTANCE_COUNT server containers and database containers"
