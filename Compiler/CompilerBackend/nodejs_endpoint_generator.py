@@ -1,11 +1,11 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.3'
+NODEJ_CODE_GENERATOR_VERSION = '1.4'
 
 class NodeJSCodeGenerator:
     def __init__(self, endpoint_data):
         self.endpoint_data = endpoint_data
         self.generated_endpoints = []  # List to store the generated endpoints
 
-    def format_query_params(self, query_params):
+    def format_query_params(self, method, query_params):
         """
         Formats the query parameters as a string for the generated code
         Getting parameters by object descructuring
@@ -13,8 +13,12 @@ class NodeJSCodeGenerator:
         :param query_params: List of query parameters.
         :return: The formatted query parameters as a string.
         """
+
         if query_params:
-            return f"{{ {', '.join(query_params)} }} = req.query"
+            if  method == 'get':
+                return f"{{ {', '.join(query_params)} }} = req.query"
+            else:
+                return f"{{ {', '.join(query_params)} }} = req.body"
         return ""
     
     def generate_sql_query(self, table_name, method, query_params):
@@ -105,7 +109,7 @@ class NodeJSCodeGenerator:
         :param query_params: List of query parameters.
         :return: The generated code in JavaScript notation for Fastify servers.
         """
-        query_params_code = self.format_query_params(query_params)
+        query_params_code = self.format_query_params(method, query_params)
         parameter_validation_code = self.generate_parmeter_validation(query_params)
         sql_query_code = self.generate_sql_query(table_name, method, query_params)
         query_processing_code = self.generate_query_processing(method, query_params)
