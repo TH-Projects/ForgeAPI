@@ -112,7 +112,7 @@ class NodeJSCodeGenerator:
         
         # Templating module and endpoint function
         endpoint_code = (
-            f"const consensusVoting = require('../Consensus/consensusVoting');\n\n"
+            f"const consensusVoting = require('../../Consensus/consensusVoting');\n\n"
             f"const {url.replace('/', '')} = async (fastify) => {{\n"
             f"    fastify.{method}('{url}', async (req, res) => {{\n\n"
         )
