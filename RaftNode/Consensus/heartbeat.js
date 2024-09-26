@@ -1,8 +1,8 @@
 const {getAllConnections, getLeaderConnection, getConnection} = require('../Socket/connectionStorage');
 const {consensusTypes} = require('../enums');
 const webSocket = require('ws');
-const {getLatestId, getAllByStartId, insertWithDate} = require('../DB/initial/consensus_Node_Log');
-const {dbInteraction} = require('../DB/initial/dbInteraction');
+const {getLatestId, getAllByStartId, insert} = require('../DB/consensus_Node_Log');
+const {dbInteraction} = require('../DB/dbInteraction');
 
 const sendHeartbeat = async (fastify) => {
     const connections = getAllConnections();
@@ -82,7 +82,7 @@ const handleMissingLog = async (fastify, payload) => {
 const insertMissingLog = async (fastify, payload) => {
     const entries = payload.entries.sort((a, b) => a.id - b.id);
     for(const entry of entries){
-        const {success} = await insertWithDate(fastify, entry.command, entry.commandtime);
+        const {success} = await insert(fastify, entry.command);
         if(!success)
             return false;
         const commandJson = JSON.parse(entry.command);

@@ -1,6 +1,6 @@
 const {getAllConnections, getConnection, getConnectionCount} = require('../Socket/connectionStorage');
 const {consensusTypes} = require('../enums');
-const {getLatestId} = require('../DB/initial/consensus_Node_Log');
+const {getLatestId} = require('../DB/consensus_Node_Log');
 const webSocket = require('ws');
 const {getConsensus} = require('./session');
 

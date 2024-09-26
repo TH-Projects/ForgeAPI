@@ -1,7 +1,7 @@
 
 // Possible communication types between nodes
 const communicationTypes = Object.freeze({
-    ADDCONNECTION: "ADDCONNECTION",
+    ADDCONNECTION: "ADDCONNECTION"
 });
 
 const consensusTypes = Object.freeze({
@@ -11,9 +11,20 @@ const consensusTypes = Object.freeze({
     ELECTIONRESULT: "ELECTIONRESULT",
     MISSINGLOG: "MISSINGLOG",
     APPENDLOG: "APPENDLOG",
+    REQUESTCONSENSUSVOTING: "REQUESTCONSENSUSVOTING",
+    RESPONSECONSENSUSVOTING: "RESPONSECONSENSUSVOTING",
+    APPLYLOG: "APPLYLOG",
+    DELETELOG: "DELETELOG"
 });
+
+const dbMethods = Object.freeze({
+    GET: "GET",
+    POST: "POST"
+});
+
 
 module.exports = {
     communicationTypes,
-    consensusTypes
+    consensusTypes,
+    dbMethods
 }

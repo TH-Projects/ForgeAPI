@@ -36,15 +36,15 @@ for i in $(seq 1 $INSTANCE_COUNT)
 do
   cat <<EOL >> $DOCKER_COMPOSE_FILE
   db-${i}:
-    image: postgres:14
+    image: mariadb:latest
     container_name: db-${i}
     env_file:
       - .env
     volumes:
-      - db_data_${i}:/var/lib/postgresql/data
-      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data_${i}:/var/lib/mysql
+      - ./DB/schema.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "$((5432 + i)):5432"
+      - "$((5432 + i)):3306"
 EOL
 done
 

@@ -3,7 +3,9 @@ const {addConnection} = require('./connectionStorage');
 const {getConsensus} = require('../Consensus/session');
 const {handleLeaderElection, handleVoteResponse, publishLeaderElection} = require('../Consensus/leaderElection');
 const {handleHeartbeat, handleMissingLog, insertMissingLog} = require('../Consensus/heartbeat');
-const {dbInteraction} = require('../DB/initial/dbInteraction');
+const {applyLog} = require('../DB/dbInteraction');
+const {handleVotingRequest, handleVotingResponse} = require('../Consensus/consensusVoting');
+const {deleteLog} = require('../DB/consensus_Node_Log');
 
 //handles the messages from connectionIn and connectionOut
 const handleMessage = (fastify, message, ws) => {
@@ -47,6 +49,22 @@ const handleMessage = (fastify, message, ws) => {
             // Handle the append log
             insertMissingLog(fastify, payload);
             break;
+        case consensusTypes.REQUESTCONSENSUSVOTING:
+            // Handle the request consensus voting
+            handleVotingRequest(fastify, payload);
+            break;
+        case consensusTypes.RESPONSECONSENSUSVOTING:
+            // Handle the response consensus voting
+            handleVotingResponse(payload);
+            break;
+        case consensusTypes.APPLYLOG:
+            // Handle the apply log
+            applyLog(fastify, payload.logId);
+            break;
+        case consensusTypes.DELETELOG:
+            // Handle the delete log
+            handleDeleteLog(fastify, payload);
+            break;
         default:
             console.log('Invalid message type');
     }
@@ -67,7 +85,6 @@ const updateLeader = (serverId) => {
         consensus.stopsSelectLeaderTimeout();
         consensus.setLeader(serverId);
     }
-
 }
 
 //handle heartbeat and check current logId
@@ -77,6 +94,15 @@ const handleIncomingHeartbeat = async (fastify, payload) => {
         consensus.receiveHeartbeat(payload);
         await handleHeartbeat(fastify, payload);
     }
+}
+
+// Handle the delete log
+const handleDeleteLog = async (fastify, payload) => {
+    if(!payload.logId){
+        console.log('Invalid logId');
+        return;
+    }
+    await deleteLog(fastify, payload.logId);
 }
 module.exports = {
     handleMessage

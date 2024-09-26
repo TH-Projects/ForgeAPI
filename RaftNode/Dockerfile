@@ -10,7 +10,7 @@ COPY package*.json ./
 # Installiere Abhängigkeiten
 RUN npm install
 
-# Kopiere den Rest des Anwendungscodes
+# Kopiere den REST des Anwendungscodes
 COPY . .
 
 # Exponiere den Port, den Fastify verwendet
