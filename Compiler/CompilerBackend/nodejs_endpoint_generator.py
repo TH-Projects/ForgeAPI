@@ -1,8 +1,9 @@
-NODEJ_CODE_GENERATOR_VERSION = '1.4.1'
+NODEJ_CODE_GENERATOR_VERSION = '1.4.2'
 
 class NodeJSCodeGenerator:
-    def __init__(self, auto_id_column, endpoint_data):
+    def __init__(self, auto_id_column, primary_keys, endpoint_data):
         self.endpoint_data = endpoint_data
+        self.primary_keys = primary_keys
         self.auto_id_columns = auto_id_column
         self.generated_endpoints = []  # List to store the generated endpoints
 
@@ -154,17 +155,28 @@ class NodeJSCodeGenerator:
 
     def generate_code(self):
         """
-        Generates the code for all endpoints based on the provided endpoint data
+        Generates the code for all endpoints based on the provided endpoint data.
+        
+        Filters out parameters that are both primary keys and auto_id columns for each table.
         
         :return: List of dictionaries containing endpoint data, including table name, URL, method, query parameters, and generated code.
         """
         for table in self.endpoint_data['tables']:
             table_name = table['table']
+            primary_key = self.primary_keys.get(table_name, None)  # Get the primary key for the current table
+            
             for endpoint in table['endpoints']:
                 method = endpoint['method']
                 url = endpoint['url']
                 query_params = endpoint['query_params']
-                filtered_params = [param for param in query_params if param not in self.auto_id_columns]
+                print(query_params)
+                print(primary_key)
+                
+                # Filter params: exclude those that are both auto_id and the primary key
+                filtered_params = [param for param in query_params 
+                                if not (param == primary_key and param in self.auto_id_columns)]
+
+                print(filtered_params)
 
                 # Generate the code for each endpoint
                 code = self.generate_endpoint_code(table_name, method, url, filtered_params)
