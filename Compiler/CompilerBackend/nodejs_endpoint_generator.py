@@ -171,7 +171,7 @@ class NodeJSCodeGenerator:
                
                 # Filter params: exclude those that are both auto_id and the primary key
                 filtered_params = [param for param in query_params 
-                                if not (param == primary_key and param in self.auto_id_columns)]
+                                if not (param == primary_key and param in self.auto_id_columns and method == 'post')]
 
                 # Generate the code for each endpoint
                 code = self.generate_endpoint_code(table_name, method, url, filtered_params)
