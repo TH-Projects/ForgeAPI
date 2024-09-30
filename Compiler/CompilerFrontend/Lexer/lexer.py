@@ -9,7 +9,7 @@ class Lexer:
 
     def _get_next_substring(self):
         """
-        Returns the next token and the matched substring from the input_text.
+        Returns the next token and the matched substring from the input_text
         """
         if self.position >= len(self.input_text):
             return None, None
@@ -34,7 +34,8 @@ class Lexer:
 
     def tokenize(self):
         """
-        Tokenize the input string into a list of (TokenDefinition, value) tuples.
+        Tokenize the input string into a list of (TokenDefinition, value) tuples
+        :return: List of (TokenDefinition, value) tuples
         """
         while self.position < len(self.input_text):
             token, substring = self._get_next_substring()
